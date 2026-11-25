@@ -1,0 +1,162 @@
+# =====================================================================
+# VIGENTRA - configuração principal
+# Todos os valores sensíveis vêm de VARIÁVEIS DE AMBIENTE.
+# Localmente, o arquivo ".env" (na raiz do projeto, fora do Git) é lido
+# automaticamente. Veja ".env.example".
+# =====================================================================
+spring:
+  application:
+    name: vigentra
+  config:
+    import: optional:file:.env[.properties]
+
+  # Variáveis VIGENTRA_*; os nomes antigos DOCUGUARD_* continuam aceitos (compatibilidade
+  # com instalações feitas antes da troca de nome). Prioridade: VIGENTRA_* > DOCUGUARD_* > padrão.
+  datasource:
+    url: ${VIGENTRA_DB_URL:${DOCUGUARD_DB_URL:jdbc:mysql://localhost:3306/vigentra?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo&characterEncoding=UTF-8}}
+    username: ${VIGENTRA_DB_USER:${DOCUGUARD_DB_USER:vigentra}}
+    password: ${VIGENTRA_DB_PASSWORD:${DOCUGUARD_DB_PASSWORD:}}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 20000
+
+  jpa:
+    # O schema é criado pelo script.sql; o Hibernate apenas valida o mapeamento.
+    hibernate:
+      ddl-auto: ${VIGENTRA_DDL_AUTO:${DOCUGUARD_DDL_AUTO:validate}}
+    open-in-view: true
+    properties:
+      hibernate:
+        jdbc.time_zone: America/Sao_Paulo
+        format_sql: false
+
+  thymeleaf:
+    cache: ${VIGENTRA_TEMPLATE_CACHE:${DOCUGUARD_TEMPLATE_CACHE:true}}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+  mail:
+    # Se MAIL_HOST estiver vazio, o sistema entra em MODO DESENVOLVIMENTO de e-mail:
+    # nada é enviado; as mensagens são gravadas em disco e marcadas como "não enviadas".
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:true}
+      mail.smtp.ssl.enable: ${MAIL_SSL:false}
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 15000
+      mail.smtp.writetimeout: 15000
+
+server:
+  port: ${SERVER_PORT:8080}
+  # Atrás do Nginx, respeita X-Forwarded-* (HTTPS, IP real do cliente)
+  forward-headers-strategy: native
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: never
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
+        name: VGSESSION
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+  health:
+    # O SMTP é opcional (modo desenvolvimento) e não deve derrubar o health check;
+    # seu status aparece em Configurações > Configuração de e-mail.
+    mail:
+      enabled: false
+
+logging:
+  file:
+    name: ${VIGENTRA_LOG_FILE:${DOCUGUARD_LOG_FILE:logs/vigentra.log}}
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+  level:
+    root: INFO
+    br.com.vigentra: INFO
+
+# ---------------------------------------------------------------------
+# Configurações próprias da aplicação
+# ---------------------------------------------------------------------
+app:
+  name: VIGENTRA
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  timezone: America/Sao_Paulo
+  remember-me-key: ${APP_REMEMBER_ME_KEY:}
+  # Chave para assinar (HMAC) os links de preferências/descadastro enviados por e-mail.
+  secret-key: ${APP_SECRET_KEY:}
+  # E-mails dos operadores da PLATAFORMA (acesso ao painel global de comunicação), separados por vírgula.
+  platform-admins: ${APP_PLATFORM_ADMINS:}
+  storage:
+    # Diretório FORA da pasta pública onde os anexos são gravados.
+    dir: ${APP_STORAGE_DIR:./data/uploads}
+    allowed-extensions: pdf,png,jpg,jpeg,webp
+  comunicacao:
+    # E-mails de conta (confirmação, convite...) são enviados em segundo plano, após o commit.
+    async: ${COMUNICACAO_ASYNC:true}
+  mail:
+    # auto  = Brevo se BREVO_API_KEY existir; senão SMTP se MAIL_HOST existir; senão modo desenvolvimento
+    # brevo | smtp | dev = força o provedor
+    provider: ${MAIL_PROVIDER:auto}
+    from: ${MAIL_FROM:nao-responda@vigentra.local}
+    from-name: ${MAIL_FROM_NAME:VIGENTRA}
+    dev-output-dir: ${MAIL_DEV_DIR:./data/emails-dev}
+    max-tentativas: 3
+    intervalo-retentativa-minutos: 60
+    brevo:
+      api-key: ${BREVO_API_KEY:}
+      api-url: ${BREVO_API_URL:https://api.brevo.com/v3}
+  whatsapp:
+    # API oficial WhatsApp Business Cloud (Meta). Sem token + phone number id o canal fica "não configurado".
+    access-token: ${WHATSAPP_ACCESS_TOKEN:}
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    business-account-id: ${WHATSAPP_BUSINESS_ACCOUNT_ID:}
+    api-url: ${WHATSAPP_API_URL:https://graph.facebook.com}
+    api-version: ${WHATSAPP_API_VERSION:v23.0}
+    app-secret: ${WHATSAPP_APP_SECRET:}
+    webhook-verify-token: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:}
+    # true = sem credenciais, gera as mensagens em disco (NÃO envia) para demonstração
+    dev-mode: ${WHATSAPP_DEV_MODE:false}
+    dev-output-dir: ${WHATSAPP_DEV_DIR:./data/whatsapp-dev}
+    idioma: ${WHATSAPP_TEMPLATE_IDIOMA:pt_BR}
+    template-proximo: ${WHATSAPP_TEMPLATE_PROXIMO:vigentra_vencimento_proximo}
+    template-vencido: ${WHATSAPP_TEMPLATE_VENCIDO:vigentra_documento_vencido}
+    template-teste: ${WHATSAPP_TEMPLATE_TESTE:hello_world}
+    template-teste-idioma: ${WHATSAPP_TEMPLATE_TESTE_IDIOMA:en_US}
+  sms:
+    # Nenhum provedor integrado nesta versão (ver docs/NOTIFICACOES.md > SMS).
+    provider: ${SMS_PROVIDER:nenhum}
+  alerts:
+    # Rotina diária (padrão 07:00). Formato cron do Spring: seg min hora dia mês dia-semana
+    cron: ${ALERTS_CRON:0 0 7 * * *}
+    retry-cron: ${ALERTS_RETRY_CRON:0 15 * * * *}
+    enabled: ${ALERTS_ENABLED:true}
+  security:
+    max-tentativas-login: 5
+    bloqueio-minutos: 15
+    max-tentativas-ip: 20
+    token-recuperacao-minutos: 30

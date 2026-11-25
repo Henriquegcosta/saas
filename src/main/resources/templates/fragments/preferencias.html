@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--/*
+  Campos de preferências de comunicação (reutilizado em: Configurações > Preferências,
+  cadastro de responsável pelo gestor e página pública de preferências).
+  p          = PreferenciasForm
+  prefixo    = prefixo do nome dos campos ('' ou 'preferencias.')
+  sw / ss    = StatusIntegracao do WhatsApp e do SMS
+  mostrarApp = exibe a opção "notificações no sistema" (só para usuários)
+  textoConsentimento = quem está declarando o consentimento
+  Os <input type="hidden" name="_campo"> fazem o Spring entender checkbox desmarcado como "false".
+*/-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="campos(p, prefixo, sw, ss, mostrarApp, textoConsentimento)" th:with="id=${#strings.replace(prefixo, '.', '-')}">
+    <div class="mb-4">
+        <label class="form-label" th:for="${id + 'celular'}">Celular (WhatsApp / SMS)</label>
+        <input class="form-control" th:id="${id + 'celular'}" th:name="${prefixo + 'celular'}" th:value="${p.celular}"
+               data-mask="telefone" inputmode="tel" placeholder="(11) 99999-0000" style="max-width: 280px">
+        <div class="form-text">Celular com DDD. Trocar o número exige uma nova autorização de recebimento.</div>
+    </div>
+
+    <div class="small-caps mb-2">Canais</div>
+    <div class="border rounded-3 p-3 mb-2">
+        <div class="form-check form-switch">
+            <input type="hidden" th:name="${'_' + prefixo + 'receberEmail'}" value="on">
+            <input class="form-check-input" type="checkbox" role="switch" th:id="${id + 'receberEmail'}" th:name="${prefixo + 'receberEmail'}"
+                   value="true" th:checked="${p.receberEmail}">
+            <label class="form-check-label" th:for="${id + 'receberEmail'}"><i class="bi bi-envelope me-1"></i><strong>E-mail</strong>
+                <span class="d-block text-muted small">Alertas de vencimento por e-mail.</span></label>
+        </div>
+    </div>
+
+    <div class="border rounded-3 p-3 mb-2">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+            <div class="form-check form-switch">
+                <input type="hidden" th:name="${'_' + prefixo + 'receberWhatsapp'}" value="on">
+                <input class="form-check-input" type="checkbox" role="switch" th:id="${id + 'receberWhatsapp'}" th:name="${prefixo + 'receberWhatsapp'}"
+                       value="true" th:checked="${p.receberWhatsapp}">
+                <label class="form-check-label" th:for="${id + 'receberWhatsapp'}"><i class="bi bi-whatsapp me-1 text-success"></i><strong>WhatsApp</strong>
+                    <span class="d-block text-muted small">Avisos mais urgentes (conforme a configuração da empresa).</span></label>
+            </div>
+            <span class="status-badge" th:classappend="'status-' + ${sw.estado().cor}" th:text="${sw.estado().label}"></span>
+        </div>
+        <div class="form-check mt-2 ms-1">
+            <input type="hidden" th:name="${'_' + prefixo + 'consentimentoWhatsapp'}" value="on">
+            <input class="form-check-input" type="checkbox" th:id="${id + 'consentimentoWhatsapp'}" th:name="${prefixo + 'consentimentoWhatsapp'}"
+                   value="true" th:checked="${p.consentimentoWhatsapp}">
+            <label class="form-check-label small" th:for="${id + 'consentimentoWhatsapp'}" th:text="${textoConsentimento} + ' a receber mensagens do VIGENTRA pelo WhatsApp neste número. A autorização pode ser revogada a qualquer momento, inclusive respondendo SAIR.'">
+                Autorizo...</label>
+        </div>
+    </div>
+
+    <div class="border rounded-3 p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+            <div class="form-check form-switch">
+                <input type="hidden" th:name="${'_' + prefixo + 'receberSms'}" value="on">
+                <input class="form-check-input" type="checkbox" role="switch" th:id="${id + 'receberSms'}" th:name="${prefixo + 'receberSms'}"
+                       value="true" th:checked="${p.receberSms}">
+                <label class="form-check-label" th:for="${id + 'receberSms'}"><i class="bi bi-chat-dots me-1"></i><strong>SMS</strong>
+                    <span class="d-block text-muted small" th:if="${ss.estado().name() == 'INDISPONIVEL'}">Ainda não disponível: a preferência fica salva para quando o canal for ativado.</span></label>
+            </div>
+            <span class="status-badge" th:classappend="'status-' + ${ss.estado().cor}" th:text="${ss.estado().label}"></span>
+        </div>
+        <div class="form-check mt-2 ms-1">
+            <input type="hidden" th:name="${'_' + prefixo + 'consentimentoSms'}" value="on">
+            <input class="form-check-input" type="checkbox" th:id="${id + 'consentimentoSms'}" th:name="${prefixo + 'consentimentoSms'}"
+                   value="true" th:checked="${p.consentimentoSms}">
+            <label class="form-check-label small" th:for="${id + 'consentimentoSms'}" th:text="${textoConsentimento} + ' a receber SMS do VIGENTRA neste número.'">Autorizo...</label>
+        </div>
+    </div>
+
+    <div class="small-caps mb-2">Tipos de alerta</div>
+    <div class="d-flex flex-wrap gap-3 mb-3">
+        <div class="form-check">
+            <input type="hidden" th:name="${'_' + prefixo + 'alertaAntecedencia'}" value="on">
+            <input class="form-check-input" type="checkbox" th:id="${id + 'alertaAntecedencia'}" th:name="${prefixo + 'alertaAntecedencia'}"
+                   value="true" th:checked="${p.alertaAntecedencia}">
+            <label class="form-check-label" th:for="${id + 'alertaAntecedencia'}">Vencimento próximo (30, 15, 7 dias)</label>
+        </div>
+        <div class="form-check">
+            <input type="hidden" th:name="${'_' + prefixo + 'alertaVenceHoje'}" value="on">
+            <input class="form-check-input" type="checkbox" th:id="${id + 'alertaVenceHoje'}" th:name="${prefixo + 'alertaVenceHoje'}"
+                   value="true" th:checked="${p.alertaVenceHoje}">
+            <label class="form-check-label" th:for="${id + 'alertaVenceHoje'}">No dia do vencimento</label>
+        </div>
+        <div class="form-check">
+            <input type="hidden" th:name="${'_' + prefixo + 'alertaVencido'}" value="on">
+            <input class="form-check-input" type="checkbox" th:id="${id + 'alertaVencido'}" th:name="${prefixo + 'alertaVencido'}"
+                   value="true" th:checked="${p.alertaVencido}">
+            <label class="form-check-label" th:for="${id + 'alertaVencido'}">Após o vencimento</label>
+        </div>
+    </div>
+
+    <div class="border rounded-3 p-3 mb-3" th:if="${mostrarApp}">
+        <div class="form-check form-switch">
+            <input type="hidden" name="_notificacoesApp" value="on">
+            <input class="form-check-input" type="checkbox" role="switch" id="notificacoesApp" name="notificacoesApp" value="true"
+                   th:checked="${p.notificacoesApp}">
+            <label class="form-check-label" for="notificacoesApp"><i class="bi bi-bell me-1"></i><strong>Notificações no sistema</strong>
+                <span class="d-block text-muted small">Exibe os alertas no sino do cabeçalho e na página de notificações.</span></label>
+        </div>
+    </div>
+</div>
+</body>
+</html>

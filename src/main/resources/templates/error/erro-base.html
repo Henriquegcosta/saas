@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!--/* Base das páginas de erro (sem dependência de usuário logado) */-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:fragment="erro(codigo, icone, titulo, mensagem)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${codigo} + ' · VIGENTRA'">Erro · VIGENTRA</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="d-flex align-items-center justify-content-center" style="min-height:100vh">
+<main class="text-center p-4" style="max-width: 480px">
+    <a th:href="@{/}" class="d-inline-flex align-items-center gap-2 fw-bold fs-5 text-dark mb-5">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <div class="empty-state p-0">
+        <div class="icon"><i class="bi" th:classappend="${icone}"></i></div>
+        <div class="small-caps mb-2" th:text="'Erro ' + ${codigo}"></div>
+        <h1 class="h3" th:text="${titulo}"></h1>
+        <p th:text="${mensagem}"></p>
+        <div class="d-flex justify-content-center gap-2">
+            <a class="btn btn-light" th:href="@{/app/dashboard}">Ir para o painel</a>
+            <a class="btn btn-primary" th:href="@{/}">Página inicial</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

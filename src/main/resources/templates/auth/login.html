@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Entrar · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <a class="d-flex d-lg-none align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <h1>Bem-vindo de volta</h1>
+    <p class="sub">Entre para acompanhar os vencimentos da sua empresa.</p>
+
+    <div th:if="${mensagemErro}" class="alert alert-danger d-flex gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i><span th:text="${mensagemErro}"></span></div>
+    <div th:if="${param.saiu}" class="alert alert-success d-flex gap-2"><i class="bi bi-check-circle-fill"></i>Você saiu com segurança.</div>
+    <div th:if="${param.expirada}" class="alert alert-warning d-flex gap-2"><i class="bi bi-clock-history"></i>
+        Sua sessão foi encerrada (permissões ou senha alteradas). Entre novamente.</div>
+    <div th:if="${sucesso}" class="alert alert-success d-flex gap-2"><i class="bi bi-check-circle-fill"></i><span th:text="${sucesso}"></span></div>
+    <div th:if="${info}" class="alert alert-info small d-flex gap-2"><i class="bi bi-code-slash"></i><span th:text="${info}"></span></div>
+
+    <form th:action="@{/login}" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="username" type="email" required autocomplete="username" autofocus
+                   maxlength="150" placeholder="voce@empresa.com.br" th:value="${emailCadastrado}">
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
+        </div>
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label" for="senha">Senha</label>
+                <a class="small fw-semibold" th:href="@{/recuperar-senha}">Esqueceu a senha?</a>
+            </div>
+            <div class="input-password">
+                <input class="form-control" id="senha" name="password" type="password" required autocomplete="current-password" maxlength="72">
+                <button class="toggle-password" type="button" aria-label="Mostrar senha"><i class="bi bi-eye"></i></button>
+                <div class="invalid-feedback">Informe sua senha.</div>
+            </div>
+        </div>
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar" value="true">
+            <label class="form-check-label small" for="lembrar">Lembrar acesso neste dispositivo por 14 dias</label>
+        </div>
+        <button class="btn btn-primary w-100 btn-lg" type="submit" data-loading-text="Entrando...">Entrar</button>
+    </form>
+
+    <p class="text-center text-muted small mt-4 mb-0">Ainda não tem conta?
+        <a class="fw-semibold" th:href="@{/cadastro}">Cadastre sua empresa</a></p>
+
+</div>
+</body>
+</html>

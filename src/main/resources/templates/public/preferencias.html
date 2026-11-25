@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Preferências de comunicação · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card wide fade-up">
+    <a class="d-flex align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <h1>Preferências de comunicação</h1>
+    <p class="sub">Olá, <strong th:text="${titular.nome()}"></strong>. Escolha como deseja receber os avisos de vencimento de documentos
+        da empresa <strong th:text="${titular.empresa()}"></strong>.</p>
+
+    <div th:if="${sucesso}" class="alert alert-success d-flex gap-2"><i class="bi bi-check-circle-fill"></i><span th:text="${sucesso}"></span></div>
+    <div th:if="${erro}" class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-circle-fill"></i><span th:text="${erro}"></span></div>
+
+    <form th:action="@{/preferencias}" method="post">
+        <input type="hidden" name="a" th:value="${a}">
+        <input type="hidden" name="id" th:value="${id}">
+        <input type="hidden" name="t" th:value="${t}">
+        <div class="mb-3"><label class="form-label">E-mail</label>
+            <input class="form-control" th:value="${titular.email()}" disabled></div>
+        <div th:replace="~{fragments/preferencias :: campos(${form}, '', ${whatsappStatus}, ${smsStatus}, false, 'Autorizo')}"></div>
+        <button class="btn btn-primary w-100 btn-lg" type="submit">Salvar preferências</button>
+    </form>
+    <p class="text-muted small mt-4 mb-0">Este link é pessoal. Seus dados são tratados conforme a
+        <a th:href="@{/privacidade}" target="_blank">Política de Privacidade</a>. Para alterar o e-mail cadastrado, fale com a empresa que o cadastrou.</p>
+</div>
+</body>
+</html>

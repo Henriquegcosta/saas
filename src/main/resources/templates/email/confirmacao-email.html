@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{email/base :: layout('#2563EB', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#0B1F3A">Confirme seu endereço de e-mail</h1>
+    <p style="margin:0 0 12px">Olá, <strong th:text="${nome}">Nome</strong>.</p>
+    <p style="margin:0">A conta da empresa <strong th:text="${empresaNome}">Empresa</strong> foi criada no VIGENTRA.
+        Para ativar seu acesso, confirme que este e-mail é seu:</p>
+    <table th:replace="~{email/botao :: botao(${link}, 'Confirmar meu e-mail', '#2563EB')}"></table>
+    <p style="margin:0 0 18px;font-size:13px;color:#64748B">O link é pessoal, vale por <strong th:text="${horas}">48</strong> horas
+        e pode ser usado uma única vez. Se você não criou esta conta, ignore esta mensagem — nenhum acesso será liberado.</p>
+    <p th:replace="~{email/botao :: linkAlternativo(${link})}"></p>
+</div>
+</body>
+</html>

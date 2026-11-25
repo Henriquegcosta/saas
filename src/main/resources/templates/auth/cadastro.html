@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Criar conta · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card wide fade-up">
+    <a class="d-flex d-lg-none align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <h1>Cadastre sua empresa</h1>
+    <p class="sub">Você será o administrador da conta e poderá convidar sua equipe depois.</p>
+
+    <form th:action="@{/cadastro}" th:object="${form}" method="post" class="needs-validation" novalidate>
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex gap-2" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div>
+        </div>
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label" for="nome">Nome completo *</label>
+                <input class="form-control" id="nome" th:field="*{nome}" required minlength="3" maxlength="150" autocomplete="name"
+                       th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
+                <div class="invalid-feedback" th:unless="${#fields.hasErrors('nome')}">Informe seu nome completo.</div>
+            </div>
+            <div class="col-md-7">
+                <label class="form-label" for="empresa">Nome da empresa *</label>
+                <input class="form-control" id="empresa" th:field="*{empresa}" required maxlength="150" autocomplete="organization"
+                       th:classappend="${#fields.hasErrors('empresa')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('empresa')}" th:errors="*{empresa}"></div>
+                <div class="invalid-feedback" th:unless="${#fields.hasErrors('empresa')}">Informe o nome da empresa.</div>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="cnpj">CNPJ <span class="text-muted fw-normal">(opcional)</span></label>
+                <input class="form-control" id="cnpj" th:field="*{cnpj}" data-mask="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00"
+                       pattern="^$|^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$" th:classappend="${#fields.hasErrors('cnpj')} ? 'is-invalid'">
+                <div class="invalid-feedback">CNPJ incompleto.</div>
+            </div>
+            <div class="col-md-7">
+                <label class="form-label" for="email">E-mail *</label>
+                <input class="form-control" id="email" type="email" th:field="*{email}" required maxlength="150" autocomplete="email"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                <div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">Informe um e-mail válido.</div>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label" for="telefone">Telefone</label>
+                <input class="form-control" id="telefone" th:field="*{telefone}" data-mask="telefone" inputmode="tel" autocomplete="tel"
+                       placeholder="(11) 99999-9999" th:classappend="${#fields.hasErrors('telefone')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{telefone}">Telefone inválido.</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="senha">Senha *</label>
+                <div class="input-password">
+                    <input class="form-control" id="senha" type="password" th:field="*{senha}" required minlength="8" maxlength="72"
+                           pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}" autocomplete="new-password" data-strength
+                           th:classappend="${#fields.hasErrors('senha')} ? 'is-invalid'">
+                    <button class="toggle-password" type="button" aria-label="Mostrar senha"><i class="bi bi-eye"></i></button>
+                    <div class="invalid-feedback" th:text="${#fields.hasErrors('senha')} ? ${#fields.errors('senha')[0]} : 'Mínimo de 8 caracteres com maiúscula, minúscula e número.'"></div>
+                </div>
+                <div class="password-meter"><span></span></div>
+                <div class="form-text password-label"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="confirmacaoSenha">Confirmar senha *</label>
+                <div class="input-password">
+                    <input class="form-control" id="confirmacaoSenha" type="password" th:field="*{confirmacaoSenha}" required
+                           data-match="senha" autocomplete="new-password" th:classappend="${#fields.hasErrors('confirmacaoSenha')} ? 'is-invalid'">
+                    <button class="toggle-password" type="button" aria-label="Mostrar senha"><i class="bi bi-eye"></i></button>
+                    <div class="invalid-feedback">As senhas não conferem.</div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="aceiteTermos" th:field="*{aceiteTermos}" required
+                           th:classappend="${#fields.hasErrors('aceiteTermos')} ? 'is-invalid'">
+                    <label class="form-check-label small" for="aceiteTermos">
+                        Li e aceito os <a th:href="@{/termos}" target="_blank" rel="noopener">Termos de Uso</a> e a
+                        <a th:href="@{/privacidade}" target="_blank" rel="noopener">Política de Privacidade</a>, e autorizo o tratamento
+                        dos dados para a prestação do serviço, conforme a LGPD.</label>
+                    <div class="invalid-feedback">É necessário aceitar os termos para continuar.</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary w-100 btn-lg mt-4" type="submit" data-loading-text="Criando sua conta...">Criar conta</button>
+    </form>
+    <p class="text-center text-muted small mt-4 mb-0">Já tem conta? <a class="fw-semibold" th:href="@{/login}">Entrar</a></p>
+</div>
+</body>
+</html>

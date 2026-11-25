@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--/* Layout da área logada. Uso nas páginas:
+     <html th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{::#scripts})}"> */-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="app(title, content, scripts)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="robots" content="noindex">
+    <title th:replace="${title}">VIGENTRA</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/doki.css}">
+</head>
+<body>
+<a class="visually-hidden-focusable position-absolute top-0 start-0 p-2 bg-white" href="#conteudo-principal">Pular para o conteúdo</a>
+
+<div class="dg-shell">
+    <!-- ================= MENU LATERAL ================= -->
+    <aside class="dg-sidebar" aria-label="Menu principal">
+        <a class="dg-brand" th:href="@{/app/dashboard}">
+            <img th:src="@{/img/logo.svg}" alt="">
+            <span><span class="name d-block">VIGENTRA</span><span class="tag">Gestão de validade</span></span>
+        </a>
+        <div class="dg-tenant" th:if="${usuarioLogado}">
+            <span class="avatar-sm"><i class="bi bi-building"></i></span>
+            <span class="text-truncate" th:text="${usuarioLogado.empresaNome}" th:title="${usuarioLogado.empresaNome}">Empresa</span>
+        </div>
+        <nav class="dg-nav">
+            <div class="section">Visão geral</div>
+            <a th:href="@{/app/dashboard}" th:classappend="${#strings.startsWith(caminho,'/app/dashboard')} ? 'active'">
+                <i class="bi bi-grid-1x2"></i> Dashboard</a>
+            <a th:href="@{/app/documentos}" th:classappend="${#strings.startsWith(caminho,'/app/documentos')} ? 'active'">
+                <i class="bi bi-file-earmark-text"></i> Documentos</a>
+            <a th:href="@{/app/calendario}" th:classappend="${#strings.startsWith(caminho,'/app/calendario')} ? 'active'">
+                <i class="bi bi-calendar3"></i> Calendário</a>
+            <a th:href="@{/app/notificacoes}" th:classappend="${#strings.startsWith(caminho,'/app/notificacoes')} ? 'active'">
+                <i class="bi bi-bell"></i> Notificações
+                <span class="count" th:if="${notificacoesNaoLidas > 0}" th:text="${notificacoesNaoLidas > 99 ? '99+' : notificacoesNaoLidas}">3</span></a>
+            <a sec:authorize="hasAuthority('REPORT_VIEW')" th:href="@{/app/relatorios}"
+               th:classappend="${#strings.startsWith(caminho,'/app/relatorios')} ? 'active'">
+                <i class="bi bi-bar-chart-line"></i> Relatórios</a>
+
+            <th:block sec:authorize="hasAnyAuthority('USER_MANAGE','RESP_MANAGE','AUDIT_VIEW')">
+                <div class="section">Administração</div>
+                <a sec:authorize="hasAuthority('USER_MANAGE')" th:href="@{/app/usuarios}"
+                   th:classappend="${#strings.startsWith(caminho,'/app/usuarios')} ? 'active'">
+                    <i class="bi bi-people"></i> Usuários</a>
+                <a sec:authorize="hasAuthority('RESP_MANAGE')" th:href="@{/app/responsaveis}"
+                   th:classappend="${#strings.startsWith(caminho,'/app/responsaveis')} ? 'active'">
+                    <i class="bi bi-person-vcard"></i> Responsáveis</a>
+                <a sec:authorize="hasAuthority('AUDIT_VIEW')" th:href="@{/app/atividades}"
+                   th:classappend="${#strings.startsWith(caminho,'/app/atividades')} ? 'active'">
+                    <i class="bi bi-clock-history"></i> Log de atividades</a>
+            </th:block>
+
+            <th:block sec:authorize="hasRole('PLATAFORMA')">
+                <div class="section">Plataforma</div>
+                <a th:href="@{/plataforma/comunicacao}" th:classappend="${#strings.startsWith(caminho,'/plataforma')} ? 'active'">
+                    <i class="bi bi-broadcast-pin"></i> Comunicação (global)</a>
+            </th:block>
+
+            <div class="section">Conta</div>
+            <a th:href="@{/app/configuracoes}" th:classappend="${#strings.startsWith(caminho,'/app/configuracoes')} ? 'active'">
+                <i class="bi bi-gear"></i> Configurações</a>
+        </nav>
+        <div class="dg-sidebar-foot">
+            <div class="d-flex align-items-center gap-2"><i class="bi bi-shield-check"></i> Dados isolados por empresa</div>
+        </div>
+    </aside>
+    <div class="dg-backdrop"></div>
+
+    <!-- ================= ÁREA PRINCIPAL ================= -->
+    <div class="dg-main">
+        <header class="dg-topbar">
+            <button class="btn btn-ghost btn-icon d-lg-none" type="button" data-toggle-sidebar aria-label="Abrir menu">
+                <i class="bi bi-list fs-5"></i></button>
+            <form class="dg-search d-none d-sm-block" th:action="@{/app/documentos}" method="get" role="search">
+                <i class="bi bi-search"></i>
+                <input id="buscaGlobal" class="form-control" type="search" name="q" placeholder="Buscar documentos, números, responsáveis..."
+                       aria-label="Buscar documentos" th:value="${param.q}">
+            </form>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <a sec:authorize="hasAuthority('DOC_CREATE')" class="btn btn-primary btn-sm d-none d-md-inline-flex align-items-center"
+                   th:href="@{/app/documentos/novo}"><i class="bi bi-plus-lg me-1"></i> Novo documento</a>
+
+                <!-- Notificações -->
+                <div class="dropdown">
+                    <button class="btn btn-ghost btn-icon notif-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                            aria-label="Notificações">
+                        <i class="bi bi-bell fs-5"></i>
+                        <span class="dot" th:if="${notificacoesNaoLidas > 0}" th:text="${notificacoesNaoLidas > 9 ? '9+' : notificacoesNaoLidas}">2</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end notif-menu">
+                        <div class="notif-head d-flex align-items-center justify-content-between">
+                            <div><strong>Notificações</strong>
+                                <span class="text-muted small ms-1" th:text="${notificacoesNaoLidas} + ' não lida(s)'"></span></div>
+                            <form th:if="${notificacoesNaoLidas > 0}" th:action="@{/app/notificacoes/marcar-todas}" method="post" data-no-loading>
+                                <button class="btn btn-link btn-sm p-0" type="submit">Marcar todas como lidas</button>
+                            </form>
+                        </div>
+                        <div style="max-height: 360px; overflow-y: auto">
+                            <a th:each="n : ${notificacoesRecentes}" class="notif-item" th:href="@{/app/notificacoes/{id}/abrir(id=${n.id})}">
+                                <span class="notif-icon" th:classappend="${n.tipo.cor}">
+                                    <i class="bi" th:classappend="${n.tipo.name() == 'ANTECEDENCIA'} ? 'bi-hourglass-split' : 'bi-exclamation-octagon'"></i></span>
+                                <span class="min-w-0">
+                                    <span class="d-block fw-semibold small text-truncate" th:text="${n.titulo}">Título</span>
+                                    <span class="d-block text-muted small" style="font-size:.76rem" th:text="${n.mensagem}">Mensagem</span>
+                                    <span class="d-block text-muted" style="font-size:.7rem" th:text="${#temporals.format(n.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                            </a>
+                            <div th:if="${#lists.isEmpty(notificacoesRecentes)}" class="text-center text-muted small py-4">
+                                <i class="bi bi-check2-circle fs-3 d-block mb-1 text-success"></i> Você está em dia!
+                            </div>
+                        </div>
+                        <a class="d-block text-center small fw-semibold py-2 border-top" th:href="@{/app/notificacoes}">Ver todas as notificações</a>
+                    </div>
+                </div>
+
+                <!-- Perfil -->
+                <div class="dropdown" th:if="${usuarioLogado}">
+                    <button class="btn btn-ghost d-flex align-items-center gap-2 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar" th:text="${usuarioLogado.iniciais}">AB</span>
+                        <span class="d-none d-md-block text-start lh-sm">
+                            <span class="d-block fw-semibold small" th:text="${usuarioLogado.primeiroNome}">Nome</span>
+                            <span class="d-block text-muted" style="font-size:.72rem" th:text="${usuarioLogado.perfil.nome}">Perfil</span>
+                        </span>
+                        <i class="bi bi-chevron-down small text-muted d-none d-md-inline"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 240px">
+                        <li class="px-3 py-2">
+                            <div class="fw-semibold" th:text="${usuarioLogado.nome}"></div>
+                            <div class="text-muted small text-truncate" th:text="${usuarioLogado.email}"></div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/app/configuracoes(aba='perfil')}"><i class="bi bi-person me-2"></i>Meu perfil</a></li>
+                        <li><a class="dropdown-item" th:href="@{/app/configuracoes(aba='notificacoes')}"><i class="bi bi-bell me-2"></i>Preferências de notificação</a></li>
+                        <li><a class="dropdown-item" th:href="@{/app/configuracoes(aba='senha')}"><i class="bi bi-key me-2"></i>Alterar senha</a></li>
+                        <li><a class="dropdown-item" th:href="@{/app/configuracoes}"><i class="bi bi-gear me-2"></i>Configurações</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" data-no-loading>
+                                <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Sair</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="banner-dev" th:if="${modoDevEmail}" sec:authorize="hasAuthority('SETTINGS_MANAGE')">
+            <i class="bi bi-envelope-exclamation me-1"></i>
+            <strong>E-mail em modo desenvolvimento:</strong> nenhum e-mail é enviado de verdade (nenhum provedor configurado).
+            <a th:href="@{/app/configuracoes(aba='canais')}" class="fw-semibold">Ver canais de comunicação</a>
+        </div>
+
+        <main class="dg-content" id="conteudo-principal">
+            <div th:replace="${content}"></div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{fragments/ui :: toasts}"></div>
+<div th:replace="~{fragments/ui :: modalConfirmacao}"></div>
+<!-- Doki: assistente virtual (somente usuários autenticados) -->
+<div th:replace="~{fragments/doki :: doki}"></div>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/doki.js}"></script>
+<th:block th:replace="${scripts}"></th:block>
+</body>
+</html>

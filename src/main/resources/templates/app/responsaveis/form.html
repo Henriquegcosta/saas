@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Responsável · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/app/responsaveis}">Responsáveis</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${form.id == null} ? 'Novo' : 'Editar'"></li></ol></nav>
+            <h1 th:text="${form.id == null} ? 'Novo responsável' : 'Editar responsável'"></h1>
+        </div>
+    </div>
+    <div class="row"><div class="col-lg-8 col-xl-6">
+        <form class="card needs-validation" th:action="@{/app/responsaveis}" th:object="${form}" method="post" novalidate>
+            <input type="hidden" th:field="*{id}">
+            <div class="card-body row g-3">
+                <div class="col-12" th:if="${#fields.hasGlobalErrors()}">
+                    <div class="alert alert-danger d-flex gap-2 mb-0"><i class="bi bi-exclamation-circle-fill"></i>
+                        <div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div></div></div>
+                <div class="col-12">
+                    <label class="form-label" for="nome">Nome *</label>
+                    <input class="form-control" id="nome" th:field="*{nome}" required maxlength="150" th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                    <div class="invalid-feedback">Informe o nome.</div>
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label" for="email">E-mail *</label>
+                    <input class="form-control" id="email" type="email" th:field="*{email}" required maxlength="150" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                    <div class="invalid-feedback">Informe um e-mail válido.</div>
+                    <div class="form-text">Para este endereço serão enviados os alertas de vencimento.</div>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="telefone">Telefone</label>
+                    <input class="form-control" id="telefone" th:field="*{telefone}" data-mask="telefone">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="cargo">Cargo / função</label>
+                    <input class="form-control" id="cargo" th:field="*{cargo}" maxlength="100" placeholder="Ex.: Gerente administrativo">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="usuarioId">Usuário do sistema vinculado</label>
+                    <select class="form-select" id="usuarioId" th:field="*{usuarioId}">
+                        <option value="">Nenhum</option>
+                        <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nome + ' (' + u.email + ')'}"></option>
+                    </select>
+                    <div class="form-text">Usuários com perfil "Usuário" veem apenas os documentos sob sua responsabilidade.</div>
+                </div>
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
+                        <label class="form-check-label" for="ativo">Ativo (recebe alertas)</label>
+                    </div>
+                </div>
+                <div class="col-12"><hr class="my-1"></div>
+                <div class="col-12">
+                    <h2 class="h6 mb-1">Comunicação e consentimento</h2>
+                    <p class="text-muted small" th:if="${form.usuarioId != null}">
+                        <i class="bi bi-info-circle me-1"></i>Este responsável está vinculado a um usuário: os canais, o celular e as autorizações
+                        são gerenciados pelo próprio usuário em Configurações › Preferências de notificação.</p>
+                    <th:block th:if="${form.usuarioId == null}">
+                        <p class="text-muted small">Só marque a autorização de WhatsApp/SMS se o responsável realmente concordou em receber
+                            mensagens. O registro fica em seu nome, com data e hora (LGPD). O responsável também pode ajustar tudo pelo link
+                            "Gerenciar preferências" presente em cada e-mail.</p>
+                        <div th:replace="~{fragments/preferencias :: campos(${form.preferencias}, 'preferencias.', ${statusWhatsapp}, ${statusSms}, false, 'Declaro que o responsável autorizou')}"></div>
+                        <div class="small text-muted" th:if="${resp != null and resp.preferencias.whatsappConsentimentoEm != null}">
+                            <i class="bi bi-shield-check text-success me-1"></i>WhatsApp autorizado em
+                            <span th:text="${#temporals.format(resp.preferencias.whatsappConsentimentoEm,'dd/MM/yyyy HH:mm')}"></span> —
+                            <span th:text="${resp.preferencias.whatsappConsentimentoOrigem}"></span></div>
+                    </th:block>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-end gap-2 py-3">
+                <a class="btn btn-light" th:href="@{/app/responsaveis}">Cancelar</a>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Salvar</button>
+            </div>
+        </form>
+    </div></div>
+</div>
+</body>
+</html>

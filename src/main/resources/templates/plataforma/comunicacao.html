@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Plataforma · Comunicação · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item">Plataforma</li>
+                <li class="breadcrumb-item active" aria-current="page">Comunicação</li></ol></nav>
+            <h1>Painel de comunicação da plataforma</h1>
+            <p>Saúde das integrações centralizadas e envios de <strong>todas as empresas</strong>. Acesso restrito aos operadores do VIGENTRA;
+                destinatários exibidos de forma mascarada e cada consulta é registrada no log.</p>
+        </div>
+    </div>
+
+    <!-- Integrações -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4" th:each="i : ${integracoes}">
+            <div class="card h-100"><div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <strong><i class="bi me-1" th:classappend="${i.canal().icone}"></i><span th:text="${i.canal().label}"></span>
+                        <span class="text-muted fw-normal small" th:text="'· ' + ${i.provedor()}"></span></strong>
+                    <span class="status-badge" th:classappend="'status-' + ${i.estado().cor}" th:text="${i.estado().label}"></span>
+                </div>
+                <div class="small text-muted mb-2" th:text="${i.descricao()}"></div>
+                <dl class="small mb-2">
+                    <th:block th:each="d : ${i.detalhes()}">
+                        <dt class="text-muted fw-normal" th:text="${d.key}"></dt><dd class="mb-1 text-break" th:text="${d.value}"></dd>
+                    </th:block>
+                </dl>
+                <div class="d-flex flex-wrap gap-1 small">
+                    <span class="status-badge status-success" th:text="'Enviadas: ' + ${(porCanal[i.canal().name() + ':ENVIADO'] ?: 0) + (porCanal[i.canal().name() + ':ENTREGUE'] ?: 0) + (porCanal[i.canal().name() + ':LIDO'] ?: 0)}"></span>
+                    <span class="status-badge status-danger" th:text="'Falhas: ' + ${porCanal[i.canal().name() + ':FALHA'] ?: 0}"></span>
+                    <span class="status-badge status-secondary" th:text="'Pendentes: ' + ${porCanal[i.canal().name() + ':PENDENTE'] ?: 0}"></span>
+                    <span class="status-badge status-info" th:text="'Modo dev: ' + ${porCanal[i.canal().name() + ':MODO_DEV'] ?: 0}"></span>
+                </div>
+            </div></div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form class="card mb-3" th:action="@{/plataforma/comunicacao}" method="get" data-no-loading>
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small" for="empresaId">Empresa</label>
+                <select class="form-select" id="empresaId" name="empresaId" data-autosubmit>
+                    <option value="">Todas</option>
+                    <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.nome}" th:selected="${empresaId == e.id}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small" for="canal">Canal</label>
+                <select class="form-select" id="canal" name="canal" data-autosubmit>
+                    <option value="">Todos</option>
+                    <option th:each="c : ${canais}" th:value="${c.name()}" th:text="${c.label}" th:selected="${canal == c}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small" for="status">Situação</label>
+                <select class="form-select" id="status" name="status" data-autosubmit>
+                    <option value="">Todas</option>
+                    <option th:each="s : ${statusLista}" th:value="${s.name()}" th:text="${s.label}" th:selected="${status == s}"></option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small" for="tipoMensagem">Tipo de mensagem</label>
+                <select class="form-select" id="tipoMensagem" name="tipoMensagem" data-autosubmit>
+                    <option value="">Todos</option>
+                    <option th:each="t : ${tiposMensagem}" th:value="${t.name()}" th:text="${t.label}" th:selected="${tipoMensagem == t}"></option>
+                </select>
+            </div>
+            <div class="col-md-1 d-grid"><a class="btn btn-light" th:href="@{/plataforma/comunicacao}" title="Limpar filtros"><i class="bi bi-x-lg"></i></a></div>
+        </div>
+    </form>
+
+    <div class="card table-card">
+        <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+        <th:block th:if="${pagina.totalElements == 0}"
+                  th:with="filtrado=${empresaId != null or status != null or canal != null or tipoMensagem != null}">
+            <th:block th:if="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhuma mensagem encontrada', 'Nenhum envio corresponde aos filtros. Altere a empresa, o canal, a situação ou o tipo de mensagem.', @{/plataforma/comunicacao})}"></div>
+            </th:block>
+            <th:block th:unless="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazio('bi-broadcast', 'Nenhuma mensagem enviada', 'Os e-mails e mensagens enviados por todas as empresas aparecerão aqui.')}"></div>
+            </th:block>
+        </th:block>
+        <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+            <table class="table">
+                <thead><tr><th>Data e horário</th><th>Empresa</th><th>Canal</th><th>Tipo</th><th>Destinatário</th><th>Situação</th><th class="text-end">Tentativas</th></tr></thead>
+                <tbody>
+                <tr th:each="h : ${pagina.content}">
+                    <td class="small tabular text-nowrap">
+                        <div th:text="${#temporals.format(h.createdAt,'dd/MM/yyyy HH:mm')}"></div>
+                        <div class="text-muted" th:if="${h.enviadoEm}" th:text="'enviado ' + ${#temporals.format(h.enviadoEm,'dd/MM HH:mm')}"></div>
+                    </td>
+                    <td class="small fw-semibold" th:text="${h.empresa.nome}"></td>
+                    <td class="small text-nowrap"><i class="bi me-1" th:classappend="${h.canal.icone}"></i><span th:text="${h.canal.label}"></span>
+                        <div class="text-muted" th:text="${h.provedor}"></div></td>
+                    <td class="small"><div th:text="${h.tipoMensagem.label}"></div>
+                        <div class="text-muted" th:if="${h.tipoMensagem.name() == 'ALERTA_VENCIMENTO'}" th:text="${h.periodoLabel}"></div></td>
+                    <td class="small tabular" th:with="m=${@dg.mascarar(h.destinatario)}" th:text="${m}"></td>
+                    <td>
+                        <span th:replace="~{fragments/ui :: statusEnvio(${h.status})}"></span>
+                        <div class="text-danger small mt-1 text-break" style="max-width: 300px" th:if="${h.ultimoErro}" th:text="${h.ultimoErro}"></div>
+                        <div class="text-muted small" th:if="${h.proximaTentativa}" th:text="'Nova tentativa: ' + ${#temporals.format(h.proximaTentativa,'dd/MM HH:mm')}"></div>
+                    </td>
+                    <td class="text-end tabular" th:text="${h.tentativas}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+    </div>
+</div>
+</body>
+</html>

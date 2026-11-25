@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/site :: site(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Política de Privacidade · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <article class="legal">
+        <span class="small-caps">Institucional</span>
+        <h1>Política de Privacidade</h1>
+        <p class="text-muted">Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Projeto acadêmico.</p>
+
+        <h2>1. Papéis</h2>
+        <p>Em relação aos documentos e dados cadastrados pela empresa cliente, o cliente é o <strong>controlador</strong> e o VIGENTRA atua
+            como <strong>operador</strong>, tratando os dados apenas para prestar o serviço contratado.</p>
+
+        <h2>2. Dados tratados</h2>
+        <ul>
+            <li><strong>Usuários:</strong> nome, e-mail, telefone, perfil de acesso, registros de acesso (data, horário e IP);</li>
+            <li><strong>Responsáveis:</strong> nome, e-mail, telefone e cargo, para envio dos alertas;</li>
+            <li><strong>Documentos:</strong> metadados (nome, número, datas) e arquivos anexados, que podem conter dados pessoais.</li>
+        </ul>
+
+        <h2>3. Finalidades e bases legais</h2>
+        <p>Execução de contrato (art. 7º, V) para operar a plataforma e enviar alertas; cumprimento de obrigação legal e exercício regular
+            de direitos (art. 7º, II e VI) para manter registros de auditoria; legítimo interesse (art. 7º, IX) para segurança e prevenção a fraudes.</p>
+
+        <h2 id="lgpd">4. Medidas de segurança</h2>
+        <ul>
+            <li>Senhas armazenadas apenas como hash BCrypt; tokens de recuperação armazenados como hash SHA-256;</li>
+            <li>Isolamento de dados por empresa validado no servidor e no banco de dados;</li>
+            <li>Arquivos armazenados fora da área pública, com nome aleatório e acesso somente após autenticação e verificação de permissão;</li>
+            <li>Comunicação via HTTPS (TLS), proteção contra CSRF, XSS e SQL Injection e bloqueio de tentativas de login;</li>
+            <li>Trilha de auditoria das operações e controle de acesso por perfil (princípio do menor privilégio);</li>
+            <li>Credenciais de infraestrutura mantidas em variáveis de ambiente, fora do código-fonte.</li>
+        </ul>
+
+        <h2>5. Compartilhamento</h2>
+        <p>Os dados não são vendidos nem compartilhados para fins de marketing. São utilizados apenas provedores necessários à operação
+            (hospedagem e envio de e-mails).</p>
+
+        <h2>6. Retenção</h2>
+        <p>Os dados são mantidos enquanto a conta estiver ativa. Após o encerramento, são eliminados, exceto registros cuja guarda seja
+            exigida por lei (ex.: registros de acesso por 6 meses — Marco Civil da Internet, art. 15).</p>
+
+        <h2>7. Direitos do titular</h2>
+        <p>O titular pode solicitar confirmação, acesso, correção, anonimização, portabilidade e eliminação dos dados (art. 18).
+            Usuários podem baixar seus dados em <em>Configurações › Dados do usuário › Baixar meus dados</em>.
+            Demais solicitações: encaminhe ao administrador da conta da sua empresa (controlador dos dados) ou à equipe responsável pela plataforma VIGENTRA.</p>
+    </article>
+</div>
+</body>
+</html>

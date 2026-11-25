@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Convidar usuário · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/app/usuarios}">Usuários</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Convidar</li></ol></nav>
+            <h1>Convidar usuário</h1>
+            <p>A pessoa recebe um e-mail com link seguro para criar a própria senha. Você define a empresa e o nível de acesso.</p>
+        </div>
+    </div>
+
+    <form th:action="@{/app/usuarios/convites}" th:object="${form}" method="post" class="needs-validation" novalidate>
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-circle-fill"></i>
+            <div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div></div>
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">Convidado</h2></div>
+                    <div class="card-body row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">E-mail *</label>
+                            <input class="form-control" id="email" type="email" th:field="*{email}" required maxlength="150"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:text="${#fields.hasErrors('email')} ? ${#fields.errors('email')[0]} : 'Informe um e-mail válido.'"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="nome">Nome <span class="text-muted fw-normal">(opcional)</span></label>
+                            <input class="form-control" id="nome" th:field="*{nome}" maxlength="150">
+                            <div class="form-text">Usado na saudação do e-mail; a pessoa confirma ao aceitar.</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="responsavel" th:field="*{responsavel}">
+                                <label class="form-check-label" for="responsavel">Cadastrar também como responsável por documentos</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body small text-muted d-flex gap-2">
+                        <i class="bi bi-shield-check text-success fs-5"></i>
+                        <div>O link é único, vale por <strong>7 dias</strong> e só pode ser usado uma vez. Reenviar o convite gera um link novo e
+                            invalida o anterior. Você pode cancelar convites pendentes na lista de usuários.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Nível de acesso</h2></div>
+                    <div class="card-body">
+                        <div class="form-check border rounded-3 p-3 ps-5 mb-2" th:each="p : ${perfis}">
+                            <input class="form-check-input" type="radio" th:field="*{perfil}" th:value="${p.name()}" required>
+                            <label class="form-check-label w-100" th:for="${#ids.prev('perfil')}">
+                                <strong th:text="${p.nome}"></strong>
+                                <span class="d-block text-muted small" th:text="${p.descricao}"></span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" type="submit" data-loading-text="Enviando convite..."><i class="bi bi-send me-1"></i>Enviar convite</button>
+                    <a class="btn btn-light" th:href="@{/app/usuarios}">Cancelar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

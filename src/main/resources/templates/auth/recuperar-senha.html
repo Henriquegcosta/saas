@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Recuperar senha · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <a class="text-muted small d-inline-flex align-items-center gap-1 mb-4" th:href="@{/login}"><i class="bi bi-arrow-left"></i> Voltar ao login</a>
+    <h1>Recuperar senha</h1>
+    <p class="sub">Informe o e-mail cadastrado. Enviaremos um link seguro, válido por 30 minutos, para criar uma nova senha.</p>
+
+    <div th:if="${enviado}" class="alert alert-success d-flex gap-2" role="status">
+        <i class="bi bi-envelope-check-fill"></i>
+        <span>Se o e-mail estiver cadastrado e ativo, você receberá as instruções em instantes. Verifique também a caixa de spam.</span>
+    </div>
+    <div th:if="${info}" class="alert alert-info d-flex gap-2"><i class="bi bi-info-circle-fill"></i><span th:text="${info}"></span></div>
+    <div th:if="${erro}" class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-circle-fill"></i><span th:text="${erro}"></span></div>
+
+    <form th:action="@{/recuperar-senha}" method="post" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="email" type="email" required maxlength="150" autocomplete="email" autofocus>
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
+        </div>
+        <button class="btn btn-primary w-100 btn-lg" type="submit" data-loading-text="Enviando...">Enviar link de redefinição</button>
+    </form>
+</div>
+</body>
+</html>

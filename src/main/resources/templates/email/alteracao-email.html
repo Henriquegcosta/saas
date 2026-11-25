@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{email/base :: layout('#2563EB', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#0B1F3A">Confirme seu novo e-mail de acesso</h1>
+    <p style="margin:0 0 12px">Olá, <strong th:text="${nome}">Nome</strong>.</p>
+    <p style="margin:0">Recebemos um pedido para trocar o e-mail de login da sua conta de
+        <strong th:text="${emailAtual}">atual</strong> para <strong th:text="${novoEmail}">novo</strong>.
+        A troca só acontece depois que você confirmar:</p>
+    <table th:replace="~{email/botao :: botao(${link}, 'Confirmar novo e-mail', '#2563EB')}"></table>
+    <p style="margin:0 0 18px;font-size:13px;color:#64748B">O link vale por <strong th:text="${horas}">24</strong> horas e pode ser usado uma vez.
+        Se você não fez este pedido, ignore a mensagem: o e-mail atual continua valendo.</p>
+    <p th:replace="~{email/botao :: linkAlternativo(${link})}"></p>
+</div>
+</body>
+</html>

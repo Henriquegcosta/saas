@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/site :: site(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>VIGENTRA — Gestão de validade de documentos e certificados</title></head>
+<body>
+<div id="conteudo">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+        <div class="container position-relative">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 fade-up">
+                    <span class="eyebrow"><span class="pill">Novo</span> Alertas automáticos por e-mail todos os dias</span>
+                    <h1>Controle a validade dos seus documentos <span class="grad">antes que eles vençam.</span></h1>
+                    <p class="lead">Alvarás, certidões negativas, contratos, CNHs, certificados digitais e documentos de funcionários
+                        organizados em um só lugar — com avisos automáticos para os responsáveis no momento certo.</p>
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a class="btn btn-primary btn-lg" th:href="@{/cadastro}">Começar agora <i class="bi bi-arrow-right ms-1"></i></a>
+                        <a class="btn btn-light btn-lg" th:href="@{/login}"><i class="bi bi-box-arrow-in-right me-1"></i> Entrar</a>
+                    </div>
+                    <div class="trust">
+                        <span><i class="bi bi-check-circle-fill me-1"></i>Sem instalação</span>
+                        <span><i class="bi bi-check-circle-fill me-1"></i>Dados isolados por empresa</span>
+                        <span><i class="bi bi-check-circle-fill me-1"></i>Adequado à LGPD</span>
+                    </div>
+                </div>
+                <div class="col-lg-6 fade-up-2">
+                    <div class="mockup-wrap">
+                        <div class="mockup" aria-hidden="true">
+                            <div class="bar"><i></i><i></i><i></i><small>vigentra · dashboard</small></div>
+                            <div class="body">
+                                <div class="side"><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
+                                <div class="main">
+                                    <div class="kpis">
+                                        <div class="k"><small>Total</small><b>48</b></div>
+                                        <div class="k"><small>Regulares</small><b class="text-success">39</b></div>
+                                        <div class="k"><small>Próximos</small><b class="text-warning">6</b></div>
+                                        <div class="k"><small>Vencidos</small><b class="text-danger">3</b></div>
+                                    </div>
+                                    <div class="rows">
+                                        <div class="r"><span class="cat-dot" style="background:#2563EB"></span><span class="t">Alvará de Funcionamento</span><span class="status-badge status-PROXIMO_VENCIMENTO">em 12 dias</span></div>
+                                        <div class="r"><span class="cat-dot" style="background:#16A34A"></span><span class="t">Certificado Digital e-CNPJ</span><span class="status-badge status-PROXIMO_VENCIMENTO">em 5 dias</span></div>
+                                        <div class="r"><span class="cat-dot" style="background:#7C3AED"></span><span class="t">CND Federal</span><span class="status-badge status-VENCIDO">vencida</span></div>
+                                        <div class="r"><span class="cat-dot" style="background:#0891B2"></span><span class="t">Contrato de Locação</span><span class="status-badge status-REGULAR">regular</span></div>
+                                        <div class="r"><span class="cat-dot" style="background:#EA580C"></span><span class="t">CNH — Motorista</span><span class="status-badge status-REGULAR">regular</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="float f1"><span class="notif-icon warning"><i class="bi bi-envelope"></i></span>
+                            <div><strong class="d-block">Alerta enviado</strong><span class="text-muted">Alvará vence em 15 dias</span></div></div>
+                        <div class="float f2"><span class="notif-icon primary"><i class="bi bi-shield-check"></i></span>
+                            <div><strong class="d-block">Tudo em dia</strong><span class="text-muted">39 documentos regulares</span></div></div>
+                    </div>
+                    <p class="mockup-caption">Ilustração da interface</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= PROBLEMA ================= -->
+    <section class="section section-alt">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-5">
+                    <span class="small-caps text-danger">O problema</span>
+                    <h2 class="h1 mt-2 mb-3" style="letter-spacing:-.03em">Documento vencido custa caro.</h2>
+                    <p class="text-muted mb-0">Planilhas esquecidas, lembretes no celular de uma única pessoa e e-mails perdidos fazem
+                        empresas perderem prazos. O resultado são multas, interdições, contratos suspensos, licitações perdidas e
+                        colaboradores impedidos de trabalhar.</p>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        <div class="col-sm-6"><div class="card feature"><span class="ic ic-red"><i class="bi bi-cash-coin"></i></span>
+                            <h3>Multas e autuações</h3><p>Alvarás e licenças vencidas geram penalidades e até interdição do estabelecimento.</p></div></div>
+                        <div class="col-sm-6"><div class="card feature"><span class="ic ic-amber"><i class="bi bi-briefcase"></i></span>
+                            <h3>Negócios travados</h3><p>Sem certidões negativas válidas, não é possível participar de licitações ou fechar contratos.</p></div></div>
+                        <div class="col-sm-6"><div class="card feature"><span class="ic ic-navy"><i class="bi bi-person-x"></i></span>
+                            <h3>Equipe parada</h3><p>CNHs, ASOs e certificações profissionais vencidas impedem colaboradores de atuar.</p></div></div>
+                        <div class="col-sm-6"><div class="card feature"><span class="ic ic-violet"><i class="bi bi-key"></i></span>
+                            <h3>Sistemas fora do ar</h3><p>Certificado digital expirado bloqueia emissão de notas fiscais e obrigações acessórias.</p></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FUNCIONALIDADES ================= -->
+    <section class="section" id="funcionalidades">
+        <div class="container">
+            <div class="section-title">
+                <span class="kicker">Funcionalidades</span>
+                <h2>Tudo o que você precisa para nunca perder um prazo</h2>
+                <p>Uma plataforma completa, simples de usar e pronta para o dia a dia de escritórios, clínicas e prestadores de serviço.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-blue"><i class="bi bi-envelope-check"></i></span>
+                    <h3>Alertas automáticos</h3><p>Rotina diária envia e-mails 30, 15 e 7 dias antes, no dia e após o vencimento — sem duplicidade e com nova tentativa em caso de falha.</p></div></div>
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-green"><i class="bi bi-traffic-light"></i></span>
+                    <h3>Situação calculada sozinha</h3><p>Cada documento é classificado como regular, próximo do vencimento ou vencido, com cores que facilitam a leitura.</p></div></div>
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-amber"><i class="bi bi-calendar3"></i></span>
+                    <h3>Calendário interativo</h3><p>Visualize os vencimentos do mês, navegue entre períodos e veja os detalhes de cada data em um clique.</p></div></div>
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-violet"><i class="bi bi-file-earmark-arrow-up"></i></span>
+                    <h3>Anexos seguros</h3><p>Guarde o PDF ou a imagem de cada documento com validação de formato e acesso restrito à sua empresa.</p></div></div>
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-navy"><i class="bi bi-bar-chart-line"></i></span>
+                    <h3>Relatórios e exportação</h3><p>Indicadores por mês, categoria e responsável, com exportação em PDF, Excel e CSV.</p></div></div>
+                <div class="col-md-6 col-lg-4"><div class="card card-hover feature"><span class="ic ic-red"><i class="bi bi-people"></i></span>
+                    <h3>Equipe e permissões</h3><p>Perfis de Administrador, Gestor e Usuário, com permissões configuráveis e log completo de atividades.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= COMO FUNCIONA ================= -->
+    <section class="section section-alt" id="como-funciona">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-6">
+                    <span class="small-caps text-primary">Como funciona</span>
+                    <h2 class="h1 mt-2 mb-4" style="letter-spacing:-.03em">Em poucos minutos, sua empresa está protegida.</h2>
+                    <div class="step"><span class="n">1</span><h3>Crie a conta da sua empresa</h3><p>Cadastro rápido, com categorias de documentos já configuradas.</p></div>
+                    <div class="step"><span class="n">2</span><h3>Cadastre os documentos</h3><p>Informe validade, responsável e anexe o arquivo. A situação é calculada automaticamente.</p></div>
+                    <div class="step"><span class="n">3</span><h3>Defina quem deve ser avisado</h3><p>Responsáveis, gestores e e-mails em cópia recebem os alertas configurados.</p></div>
+                    <div class="step mb-0"><span class="n">4</span><h3>Receba alertas e renove a tempo</h3><p>Acompanhe tudo pelo dashboard, calendário e histórico de notificações.</p></div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="timeline-demo" aria-label="Exemplo de régua de alertas">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong>Régua de alertas padrão</strong><span class="status-badge status-primary">configurável</span></div>
+                        <div class="ev"><span class="d">D-30</span><span class="notif-icon warning"><i class="bi bi-envelope"></i></span>
+                            <div><strong class="d-block small">Primeiro aviso</strong><span class="text-muted small">"Alvará vence em 30 dias"</span></div></div>
+                        <div class="ev"><span class="d">D-15</span><span class="notif-icon warning"><i class="bi bi-envelope"></i></span>
+                            <div><strong class="d-block small">Lembrete</strong><span class="text-muted small">Responsável e gestores notificados</span></div></div>
+                        <div class="ev"><span class="d">D-7</span><span class="notif-icon warning"><i class="bi bi-envelope-exclamation"></i></span>
+                            <div><strong class="d-block small">Atenção</strong><span class="text-muted small">Última semana para renovar</span></div></div>
+                        <div class="ev"><span class="d">D-0</span><span class="notif-icon danger"><i class="bi bi-exclamation-octagon"></i></span>
+                            <div><strong class="d-block small">Vence hoje</strong><span class="text-muted small">Aviso urgente</span></div></div>
+                        <div class="ev"><span class="d">Após</span><span class="notif-icon danger"><i class="bi bi-x-octagon"></i></span>
+                            <div><strong class="d-block small">Documento vencido</strong><span class="text-muted small">Avisos periódicos até a regularização</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= BENEFÍCIOS ================= -->
+    <section class="section" id="beneficios">
+        <div class="container">
+            <div class="section-title">
+                <span class="kicker">Benefícios para empresas</span>
+                <h2>Menos risco, menos retrabalho, mais tranquilidade</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3"><div class="benefit"><i class="bi bi-shield-check"></i><div>
+                    <h3>Conformidade contínua</h3><p>Documentos sempre válidos para fiscalizações, auditorias e licitações.</p></div></div></div>
+                <div class="col-md-6 col-lg-3"><div class="benefit"><i class="bi bi-clock"></i><div>
+                    <h3>Economia de tempo</h3><p>Sem planilhas manuais nem conferências periódicas de datas.</p></div></div></div>
+                <div class="col-md-6 col-lg-3"><div class="benefit"><i class="bi bi-diagram-3"></i><div>
+                    <h3>Responsabilidade clara</h3><p>Cada documento tem um responsável, e todos sabem o que precisa ser feito.</p></div></div></div>
+                <div class="col-md-6 col-lg-3"><div class="benefit"><i class="bi bi-journal-check"></i><div>
+                    <h3>Rastreabilidade</h3><p>Log de atividades registra quem cadastrou, alterou ou excluiu cada informação.</p></div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= SEGURANÇA ================= -->
+    <section class="section section-alt" id="seguranca">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-5">
+                    <span class="small-caps text-success">Segurança e LGPD</span>
+                    <h2 class="h1 mt-2 mb-3" style="letter-spacing:-.03em">Seus dados protegidos de ponta a ponta.</h2>
+                    <p class="text-muted">Arquitetura multi-tenant: cada empresa acessa exclusivamente os próprios dados, com isolamento
+                        garantido no servidor e nas consultas ao banco de dados.</p>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        <div class="col-sm-6"><div class="card p-3 h-100"><i class="bi bi-lock text-primary fs-4"></i>
+                            <strong class="mt-2">Senhas com BCrypt</strong><span class="text-muted small">Nunca armazenadas em texto puro.</span></div></div>
+                        <div class="col-sm-6"><div class="card p-3 h-100"><i class="bi bi-building-lock text-primary fs-4"></i>
+                            <strong class="mt-2">Isolamento por empresa</strong><span class="text-muted small">Validação de acesso em todas as consultas.</span></div></div>
+                        <div class="col-sm-6"><div class="card p-3 h-100"><i class="bi bi-shield-shaded text-primary fs-4"></i>
+                            <strong class="mt-2">Proteção CSRF, XSS e SQL Injection</strong><span class="text-muted small">Boas práticas OWASP aplicadas.</span></div></div>
+                        <div class="col-sm-6"><div class="card p-3 h-100"><i class="bi bi-person-lock text-primary fs-4"></i>
+                            <strong class="mt-2">Bloqueio de tentativas</strong><span class="text-muted small">Proteção contra força bruta no login.</span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section class="section">
+        <div class="container">
+            <div class="cta">
+                <h2 class="mb-3">Comece a proteger sua empresa hoje</h2>
+                <p class="mb-4">Crie a conta, cadastre seus primeiros documentos e receba o primeiro alerta automaticamente.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <a class="btn btn-primary btn-lg" th:href="@{/cadastro}">Criar conta da empresa</a>
+                    <a class="btn btn-light btn-lg" th:href="@{/login}">Já tenho conta</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

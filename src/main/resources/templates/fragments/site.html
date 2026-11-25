@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--/* Layouts das páginas públicas:
+     site(...)  -> com menu e rodapé (landing, termos, privacidade)
+     auth(...)  -> tela dividida (login, cadastro, recuperação de senha) */-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:fragment="site(title, content, scripts)">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="VIGENTRA: controle a validade de alvarás, certidões, contratos, CNHs e certificados digitais com alertas automáticos por e-mail.">
+    <title th:replace="${title}">VIGENTRA</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body class="site">
+
+<nav class="navbar navbar-expand-lg site-nav" th:fragment="nav">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}"><img th:src="@{/img/logo.svg}" alt=""> VIGENTRA</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navSite"
+                aria-controls="navSite" aria-expanded="false" aria-label="Abrir menu">
+            <i class="bi bi-list fs-3"></i></button>
+        <div class="collapse navbar-collapse" id="navSite">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/#funcionalidades}">Funcionalidades</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/#como-funciona}">Como funciona</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/#beneficios}">Benefícios</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/#seguranca}">Segurança</a></li>
+            </ul>
+            <div class="d-flex gap-2 py-2 py-lg-0">
+                <th:block th:if="${usuarioLogado == null}">
+                    <a class="btn btn-light" th:href="@{/login}">Entrar</a>
+                    <a class="btn btn-primary" th:href="@{/cadastro}">Criar conta grátis</a>
+                </th:block>
+                <a th:if="${usuarioLogado != null}" class="btn btn-primary" th:href="@{/app/dashboard}">
+                    <i class="bi bi-grid-1x2 me-1"></i> Ir para o painel</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div th:replace="${content}"></div>
+
+<footer class="site-footer" th:fragment="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <a class="d-flex align-items-center gap-2 text-white fw-bold fs-5 mb-3" th:href="@{/}">
+                    <img th:src="@{/img/logo.svg}" alt="" width="30" height="30"> VIGENTRA</a>
+                <p class="mb-0" style="max-width: 320px">Gestão de validade de documentos e certificados para prestadores de serviço,
+                    escritórios, clínicas e pequenas empresas.</p>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h4>Produto</h4>
+                <ul>
+                    <li><a th:href="@{/#funcionalidades}">Funcionalidades</a></li>
+                    <li><a th:href="@{/#como-funciona}">Como funciona</a></li>
+                    <li><a th:href="@{/cadastro}">Criar conta</a></li>
+                    <li><a th:href="@{/login}">Entrar</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h4>Institucional</h4>
+                <ul>
+                    <li><a th:href="@{/termos}">Termos de uso</a></li>
+                    <li><a th:href="@{/privacidade}">Política de privacidade</a></li>
+                    <li><a th:href="@{/privacidade#lgpd}">LGPD</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h4>Contato</h4>
+                <ul>
+                    <li><i class="bi bi-shield-lock me-2"></i><a th:href="@{/privacidade}">Encarregado de dados (DPO) e direitos do titular</a></li>
+                    <li><i class="bi bi-mortarboard me-2"></i>Projeto acadêmico de Desenvolvimento Full Stack</li>
+                </ul>
+            </div>
+        </div>
+        <div class="bottom d-flex flex-wrap justify-content-between gap-2">
+            <span>© <span th:text="${#temporals.year(#temporals.createNow())}">2026</span> VIGENTRA. Todos os direitos reservados.</span>
+            <span>Andressa A. Kitajima · Henrique G. Costa · Maria Eduarda C. dos Santos · Manoela S. Feitosa · Vitor S. Ferreira</span>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/app.js}"></script>
+<th:block th:replace="${scripts}"></th:block>
+</body>
+</html>

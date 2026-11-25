@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!--/* Quadro com os dados do documento, comum aos alertas */-->
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<table th:fragment="detalhes(cor)" role="presentation" width="100%" cellpadding="0" cellspacing="0"
+       style="border:1px solid #E2E8F0;border-radius:12px;background:#F8FAFC">
+    <tr><td style="padding:18px 20px">
+        <div style="font-size:17px;font-weight:700;color:#0F172A;margin-bottom:10px" th:text="${documentoNome}">Documento</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;color:#334155;line-height:1.85">
+            <tr><td style="color:#64748B;padding-right:18px">Categoria</td><td th:text="${categoria}"></td></tr>
+            <tr th:if="${numero}"><td style="color:#64748B;padding-right:18px">Número</td><td th:text="${numero}"></td></tr>
+            <tr th:if="${empresaResponsavel}"><td style="color:#64748B;padding-right:18px">Referente a</td><td th:text="${empresaResponsavel}"></td></tr>
+            <tr th:if="${responsavelNome}"><td style="color:#64748B;padding-right:18px">Responsável</td><td th:text="${responsavelNome}"></td></tr>
+            <tr><td style="color:#64748B;padding-right:18px">Vencimento</td><td><strong th:text="${vencimento}"></strong></td></tr>
+            <tr><td style="color:#64748B;padding-right:18px">Situação</td>
+                <td><strong th:style="'color:' + ${cor}" th:text="${prazo}"></strong></td></tr>
+        </table>
+    </td></tr>
+</table>
+</body>
+</html>

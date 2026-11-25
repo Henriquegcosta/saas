@@ -1,0 +1,52 @@
+# Build
+target/
+*.class
+
+# Credenciais e configuração local (NUNCA versionar)
+.env
+*.env
+!.env.example
+
+# Senha das contas de demonstração (gerada localmente, nunca publicada)
+.demo-credenciais.txt
+
+# Dados locais: anexos enviados, e-mails do modo desenvolvimento, logs
+data/
+logs/
+*.log
+
+# Backups e dumps de banco: nunca versionar cópias de dados reais
+backups/
+db-backups/
+*.sql.gz
+*.sql.zip
+*.sql.bak
+*.dump
+*.bak
+*.backup
+# nomes sugeridos em docs/DEPLOY.md (mysqldump / tar dos anexos)
+backup-*.sql
+backup-docuguard.sql
+anexos-*.tgz
+
+# Chaves e certificados privados
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+.DS_Store
+Thumbs.db
+
+# Claude Code (configurações locais)
+.claude/settings.local.json

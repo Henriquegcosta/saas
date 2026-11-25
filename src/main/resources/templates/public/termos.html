@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/site :: site(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Termos de Uso · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <article class="legal">
+        <span class="small-caps">Institucional</span>
+        <h1>Termos de Uso</h1>
+        <p class="text-muted">Versão 1.0 — vigente a partir de 01/11/2026. Projeto acadêmico.</p>
+
+        <h2>1. Objeto</h2>
+        <p>O VIGENTRA é uma plataforma on-line (Software como Serviço) para cadastro, armazenamento e acompanhamento da validade de
+            documentos e certificados de empresas, com envio de alertas automáticos por e-mail.</p>
+
+        <h2>2. Cadastro e conta</h2>
+        <p>Ao cadastrar uma empresa, o usuário declara ter poderes para representá-la e torna-se seu <strong>Administrador</strong>.
+            O Administrador é responsável por convidar usuários, definir perfis e permissões e manter os dados atualizados.
+            As credenciais são pessoais e intransferíveis.</p>
+
+        <h2>3. Responsabilidades do cliente</h2>
+        <ul>
+            <li>Informar corretamente datas de vencimento, responsáveis e e-mails de contato;</li>
+            <li>Possuir base legal para inserir dados pessoais de terceiros (funcionários, sócios, prestadores);</li>
+            <li>Não enviar arquivos ilícitos, maliciosos ou que violem direitos de terceiros.</li>
+        </ul>
+
+        <h2>4. Alertas</h2>
+        <p>Os alertas são um apoio à gestão. A renovação dos documentos permanece sob responsabilidade da empresa cliente.
+            A entrega de e-mails depende de serviços de terceiros (provedor SMTP e caixas de destino).</p>
+
+        <h2>5. Isolamento de dados</h2>
+        <p>Cada empresa acessa exclusivamente os próprios dados. O isolamento é garantido no servidor e nas consultas ao banco de dados.</p>
+
+        <h2>6. Disponibilidade e suporte</h2>
+        <p>Empregamos boas práticas para manter o serviço disponível, com cópias de segurança e monitoramento.
+            Manutenções programadas serão comunicadas com antecedência.</p>
+
+        <h2>7. Encerramento</h2>
+        <p>O cliente pode solicitar o encerramento da conta a qualquer momento. Os dados serão eliminados conforme a
+            <a th:href="@{/privacidade}">Política de Privacidade</a>, ressalvadas as obrigações legais de guarda.</p>
+
+        <h2>8. Contato</h2>
+        <p>Dúvidas sobre estes termos: fale com o administrador da conta da sua empresa ou com a equipe responsável pela plataforma VIGENTRA.</p>
+    </article>
+</div>
+</body>
+</html>

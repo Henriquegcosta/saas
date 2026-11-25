@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!--/* Componentes reutilizáveis */-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Mensagens de sucesso / erro / informação (flash attributes) -->
+<div th:fragment="toasts" class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div th:if="${sucesso}" class="toast align-items-center bg-white" role="status" aria-live="polite" data-autoshow>
+        <div class="d-flex p-3 gap-2 align-items-start">
+            <i class="bi bi-check-circle-fill text-success toast-icon"></i>
+            <div class="flex-grow-1"><strong class="d-block">Tudo certo</strong><span th:text="${sucesso}"></span></div>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+    </div>
+    <div th:if="${erro}" class="toast toast-erro align-items-center bg-white border-danger-subtle" role="alert" aria-live="assertive" data-autoshow>
+        <div class="d-flex p-3 gap-2 align-items-start">
+            <i class="bi bi-x-circle-fill text-danger toast-icon"></i>
+            <div class="flex-grow-1"><strong class="d-block text-danger">Não foi possível concluir</strong><span th:text="${erro}"></span></div>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+    </div>
+    <div th:if="${info}" class="toast align-items-center bg-white" role="status" aria-live="polite" data-autoshow>
+        <div class="d-flex p-3 gap-2 align-items-start">
+            <i class="bi bi-info-circle-fill text-info toast-icon"></i>
+            <div class="flex-grow-1"><strong class="d-block">Informação</strong><span th:text="${info}"></span></div>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal genérico de confirmação (acionado por formulários com data-confirm) -->
+<div th:fragment="modalConfirmacao" class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="d-flex gap-3">
+                    <span class="confirm-icon"><i class="bi bi-exclamation-triangle"></i></span>
+                    <div>
+                        <h2 class="h5 mb-1" id="confirmTitulo">Confirmar ação</h2>
+                        <p class="text-muted mb-0" id="confirmMensagem">Tem certeza?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light-subtle">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Badge de situação do documento -->
+<span th:fragment="status(s)" class="status-badge" th:classappend="'status-' + ${s.name()}" th:text="${s.label}">Regular</span>
+
+<!-- Badge da situação do envio -->
+<span th:fragment="statusEnvio(s)" class="status-badge" th:classappend="'status-' + ${s.cor}" th:text="${s.label}">Enviado</span>
+
+<!-- ===================== Estados vazios (padrão visual único) =====================
+     ATENÇÃO: nunca use th:if/th:unless no MESMO elemento de um th:replace destes fragmentos.
+     O th:replace é processado antes da condição, que acaba ignorada (a mensagem aparece sempre).
+     Coloque a condição num elemento externo, por exemplo: <th:block th:if="..."><div th:replace="..."></div></th:block>
+     - vazio:        lista sem registros, sem ação
+     - vazioAcao:    lista sem registros (tela sem filtros), com botão de cadastro (url null = sem botão)
+     - vazioFiltro:  pesquisa/filtro sem resultados, com botão "Limpar filtros"
+     - vazioCompacto: versão menor, para cartões e painéis laterais (texto opcional) -->
+<div th:fragment="vazio(icone, titulo, texto)" class="empty-state">
+    <div class="icon"><i class="bi" th:classappend="${icone}"></i></div>
+    <h3 th:text="${titulo}">Nada por aqui</h3>
+    <p th:text="${texto}">Descrição</p>
+</div>
+
+<div th:fragment="vazioAcao(icone, titulo, texto, rotulo, url)" class="empty-state">
+    <div class="icon"><i class="bi" th:classappend="${icone}"></i></div>
+    <h3 th:text="${titulo}">Nada por aqui</h3>
+    <p th:text="${texto}">Descrição</p>
+    <div class="empty-state-acoes" th:if="${url != null}">
+        <a class="btn btn-primary" th:href="${url}"><i class="bi bi-plus-lg me-1"></i><span th:text="${rotulo}">Cadastrar</span></a>
+    </div>
+</div>
+
+<div th:fragment="vazioFiltro(icone, titulo, texto, urlLimpar)" class="empty-state">
+    <div class="icon"><i class="bi" th:classappend="${icone}"></i></div>
+    <h3 th:text="${titulo}">Nenhum resultado encontrado</h3>
+    <p th:text="${texto}">Altere a pesquisa ou os filtros.</p>
+    <div class="empty-state-acoes">
+        <a class="btn btn-light" th:href="${urlLimpar}"><i class="bi bi-x-circle me-1"></i>Limpar filtros</a>
+    </div>
+</div>
+
+<div th:fragment="vazioCompacto(icone, titulo, texto)" class="empty-state empty-state-sm">
+    <div class="icon"><i class="bi" th:classappend="${icone}"></i></div>
+    <h3 th:text="${titulo}">Nada por aqui</h3>
+    <p th:if="${texto != null}" th:text="${texto}">Descrição</p>
+</div>
+
+<!-- Paginação (mantém os filtros da URL) -->
+<nav th:fragment="paginacao(pagina)" th:if="${pagina.totalPages > 1}" aria-label="Paginação"
+     class="d-flex flex-wrap align-items-center justify-content-between gap-2 px-3 py-3 border-top">
+    <span class="text-muted small"
+          th:text="|Mostrando ${pagina.number * pagina.size + 1}–${pagina.number * pagina.size + pagina.numberOfElements} de ${pagina.totalElements}|"></span>
+    <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+            <a class="page-link" th:with="dgUrl=${@dg.paginaUrl(pagina.number - 1)}" th:href="${dgUrl}" aria-label="Anterior"><i class="bi bi-chevron-left"></i></a></li>
+        <li class="page-item" th:each="i : ${@dg.paginas(pagina)}"
+            th:classappend="${i == pagina.number} ? 'active'">
+            <a class="page-link" th:with="dgUrl=${@dg.paginaUrl(i)}" th:href="${dgUrl}" th:text="${i + 1}">1</a></li>
+        <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+            <a class="page-link" th:with="dgUrl=${@dg.paginaUrl(pagina.number + 1)}" th:href="${dgUrl}" aria-label="Próxima"><i class="bi bi-chevron-right"></i></a></li>
+    </ul>
+</nav>
+
+</body>
+</html>

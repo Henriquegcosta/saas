@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/base :: layout(${tipo == 'VENCE_HOJE'} ? '#DC2626' : '#D97706', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <p style="margin:0 0 6px;font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:1px;font-weight:700"
+       th:text="${periodoLabel}">15 dias antes</p>
+    <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#0B1F3A">
+        <span th:if="${tipo == 'VENCE_HOJE'}">Um documento vence <span style="color:#DC2626">hoje</span></span>
+        <span th:unless="${tipo == 'VENCE_HOJE'}">Um documento está próximo do vencimento</span>
+    </h1>
+    <p style="margin:0 0 18px">Olá, <strong th:text="${destinatarioNome}">responsável</strong>. Este é um aviso automático da empresa
+        <strong th:text="${empresaNome}">Empresa</strong> sobre o documento abaixo.</p>
+    <table th:replace="~{email/alerta-detalhes :: detalhes(${tipo == 'VENCE_HOJE'} ? '#DC2626' : '#D97706')}"></table>
+    <table th:replace="~{email/botao :: botao(${baseUrl} + '/app/documentos/' + ${documentoId}, 'Abrir documento no VIGENTRA', '#2563EB')}"></table>
+    <p style="margin:0;font-size:13px;color:#64748B">Após a renovação, atualize a data de vencimento no sistema para encerrar os avisos deste documento.</p>
+    <p th:if="${assinatura}" style="margin:16px 0 0;font-size:13px;color:#334155;white-space:pre-line" th:text="${assinatura}"></p>
+</div>
+</body>
+</html>

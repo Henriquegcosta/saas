@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title th:text="${form.id == null} ? 'Novo documento · VIGENTRA' : 'Editar documento · VIGENTRA'">Documento</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/app/documentos}">Documentos</a></li>
+                <li class="breadcrumb-item" th:if="${doc}"><a th:href="@{/app/documentos/{id}(id=${doc.id})}" th:text="${doc.nome}"></a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${form.id == null} ? 'Novo' : 'Editar'"></li></ol></nav>
+            <h1 th:text="${form.id == null} ? 'Cadastrar documento' : 'Editar documento'">Documento</h1>
+            <p>A situação (regular, próximo do vencimento ou vencido) é calculada automaticamente pela data de vencimento.</p>
+        </div>
+    </div>
+
+    <form th:action="@{/app/documentos}" th:object="${form}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <input type="hidden" th:field="*{id}">
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex gap-2" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <!-- Identificação -->
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Identificação</h2></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label" for="nome">Nome do documento *</label>
+                                <input class="form-control" id="nome" th:field="*{nome}" required maxlength="150"
+                                       placeholder="Ex.: Alvará de Funcionamento — Matriz" th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:text="${#fields.hasErrors('nome')} ? ${#fields.errors('nome')[0]} : 'Informe o nome do documento.'"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="categoriaId">Categoria *</label>
+                                <select class="form-select" id="categoriaId" th:field="*{categoriaId}" required
+                                        th:classappend="${#fields.hasErrors('categoriaId')} ? 'is-invalid'">
+                                    <option value="">Selecione...</option>
+                                    <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}"></option>
+                                </select>
+                                <div class="invalid-feedback">Selecione a categoria.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="numero">Número ou identificação</label>
+                                <input class="form-control" id="numero" th:field="*{numero}" maxlength="80" placeholder="Ex.: 2026/000123">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="empresaResponsavel">Empresa responsável</label>
+                                <input class="form-control" id="empresaResponsavel" th:field="*{empresaResponsavel}" maxlength="150"
+                                       placeholder="Ex.: Matriz, Filial Centro, Fornecedor X">
+                                <div class="form-text">Unidade, filial, fornecedor ou pessoa a que o documento se refere.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="descricao">Descrição</label>
+                                <textarea class="form-control" id="descricao" th:field="*{descricao}" rows="3" maxlength="2000"
+                                          placeholder="Finalidade, órgão emissor, abrangência..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Validade -->
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Validade</h2></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="dataEmissao">Data de emissão</label>
+                                <input class="form-control" type="date" id="dataEmissao" th:field="*{dataEmissao}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="dataVencimento">Data de vencimento *</label>
+                                <input class="form-control" type="date" id="dataVencimento" th:field="*{dataVencimento}"
+                                       th:classappend="${#fields.hasErrors('dataVencimento')} ? 'is-invalid'">
+                                <div class="invalid-feedback">Informe a data de vencimento.</div>
+                                <div class="form-text" id="vencimentoHint" hidden>Documentos sem vencimento não geram alertas.</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="semVencimento" th:field="*{semVencimento}">
+                                    <label class="form-check-label" for="semVencimento">Documento sem vencimento
+                                        <span class="text-muted small">(ex.: contrato social, diplomas)</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card">
+                    <div class="card-header"><h2 class="card-title">Observações</h2></div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="observacoes" th:field="*{observacoes}" rows="3" maxlength="2000"
+                                  placeholder="Informações internas, procedimentos de renovação, contatos do órgão..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Responsável -->
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Responsável</h2>
+                        <div class="card-subtitle">Recebe os alertas de vencimento por e-mail</div></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="responsavelNome">Nome do responsável</label>
+                            <input class="form-control" id="responsavelNome" th:field="*{responsavelNome}" list="listaResponsaveis"
+                                   maxlength="150" autocomplete="off" placeholder="Selecione ou digite">
+                            <datalist id="listaResponsaveis">
+                                <option th:each="r : ${responsaveis}" th:value="${r.nome}" th:attr="data-email=${r.email}" th:text="${r.email}"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="form-label" for="responsavelEmail">E-mail do responsável</label>
+                            <input class="form-control" type="email" id="responsavelEmail" th:field="*{responsavelEmail}" maxlength="150"
+                                   placeholder="responsavel@empresa.com.br" th:classappend="${#fields.hasErrors('responsavelEmail')} ? 'is-invalid'">
+                            <div class="invalid-feedback">Informe um e-mail válido.</div>
+                            <div class="form-text">Se o e-mail ainda não estiver cadastrado, um novo responsável será criado.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anexo -->
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Anexo</h2>
+                        <div class="card-subtitle">PDF ou imagem (PNG, JPG, WEBP), até 10 MB</div></div>
+                    <div class="card-body">
+                        <div th:if="${doc != null and doc.temArquivo()}" class="file-pill mb-3">
+                            <i class="bi" th:classappend="${@dg.imagem(doc)} ? 'bi-file-earmark-image text-primary' : 'bi-file-earmark-pdf text-danger'"></i>
+                            <div class="flex-grow-1 min-w-0">
+                                <a class="fw-semibold small d-block text-truncate" th:href="@{/app/documentos/{id}/arquivo(id=${doc.id})}" target="_blank"
+                                   th:text="${doc.arquivoNomeOriginal}"></a>
+                                <span class="text-muted small" th:text="${@dg.bytes(doc.arquivoTamanho)}"></span>
+                            </div>
+                        </div>
+                        <div th:if="${doc != null and doc.temArquivo()}" class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="removerArquivo" th:field="*{removerArquivo}">
+                            <label class="form-check-label small" for="removerArquivo">Remover anexo atual</label>
+                        </div>
+                        <label class="dropzone d-block" data-exts="pdf,png,jpg,jpeg,webp" data-max="10485760">
+                            <input type="file" name="arquivo" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp">
+                            <i class="bi bi-cloud-arrow-up d-block mb-1"></i>
+                            <span class="fw-semibold d-block small" th:text="${doc != null and doc.temArquivo()} ? 'Substituir arquivo' : 'Clique ou arraste o arquivo'">Arraste</span>
+                            <span class="text-muted small">O arquivo é armazenado de forma privada</span>
+                        </label>
+                        <div class="dropzone-info"></div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" type="submit" data-loading-text="Salvando...">
+                        <i class="bi bi-check2 me-1"></i><span th:text="${form.id == null} ? 'Cadastrar documento' : 'Salvar alterações'"></span></button>
+                    <a class="btn btn-light" th:href="${doc != null} ? @{/app/documentos/{id}(id=${doc.id})} : @{/app/documentos}">Cancelar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

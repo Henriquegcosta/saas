@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Documentos · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Documentos</li></ol></nav>
+            <h1>Documentos</h1>
+            <p>Cadastre, pesquise e acompanhe a validade de todos os documentos e certificados.</p>
+        </div>
+        <a sec:authorize="hasAuthority('DOC_CREATE')" class="btn btn-primary" th:href="@{/app/documentos/novo}">
+            <i class="bi bi-plus-lg me-1"></i> Cadastrar documento</a>
+    </div>
+
+    <!-- Abas por situação -->
+    <div class="seg-tabs mb-3" role="tablist" aria-label="Filtrar por situação">
+        <a th:with="dgUrl=${@dg.comParametro('status', null)}" th:href="${dgUrl}" th:classappend="${filtro.status == null} ? 'active'">Todos
+            <span class="n" th:text="${contagens['TOTAL']}"></span></a>
+        <a th:with="dgUrl=${@dg.comParametro('status', 'VENCIDO')}" th:href="${dgUrl}" th:classappend="${filtro.status?.name() == 'VENCIDO'} ? 'active'">
+            <span class="cat-dot bg-danger"></span>Vencidos <span class="n" th:text="${contagens['VENCIDO']}"></span></a>
+        <a th:with="dgUrl=${@dg.comParametro('status', 'PROXIMO_VENCIMENTO')}" th:href="${dgUrl}" th:classappend="${filtro.status?.name() == 'PROXIMO_VENCIMENTO'} ? 'active'">
+            <span class="cat-dot bg-warning"></span>Próximos do vencimento <span class="n" th:text="${contagens['PROXIMO_VENCIMENTO']}"></span></a>
+        <a th:with="dgUrl=${@dg.comParametro('status', 'REGULAR')}" th:href="${dgUrl}" th:classappend="${filtro.status?.name() == 'REGULAR'} ? 'active'">
+            <span class="cat-dot bg-success"></span>Regulares <span class="n" th:text="${contagens['REGULAR']}"></span></a>
+        <a th:with="dgUrl=${@dg.comParametro('status', 'SEM_VENCIMENTO')}" th:href="${dgUrl}" th:classappend="${filtro.status?.name() == 'SEM_VENCIMENTO'} ? 'active'">
+            <span class="cat-dot bg-secondary"></span>Sem vencimento <span class="n" th:text="${contagens['SEM_VENCIMENTO']}"></span></a>
+    </div>
+
+    <!-- Filtros -->
+    <form class="card mb-3" th:action="@{/app/documentos}" method="get" th:object="${filtro}" data-no-loading>
+        <div class="card-body">
+            <input type="hidden" th:field="*{status}">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-lg-4">
+                    <label class="form-label small" for="q">Pesquisar</label>
+                    <div class="position-relative">
+                        <i class="bi bi-search position-absolute text-muted" style="left:.8rem;top:50%;transform:translateY(-50%)"></i>
+                        <input class="form-control ps-5" id="q" th:field="*{q}" type="search" placeholder="Nome, número, descrição ou responsável">
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label small" for="categoriaId">Categoria</label>
+                    <select class="form-select" id="categoriaId" th:field="*{categoriaId}" data-autosubmit>
+                        <option value="">Todas</option>
+                        <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label small" for="responsavelId">Responsável</label>
+                    <select class="form-select" id="responsavelId" th:field="*{responsavelId}" data-autosubmit>
+                        <option value="">Todos</option>
+                        <option th:each="r : ${responsaveis}" th:value="${r.id}" th:text="${r.nome}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label class="form-label small" for="ordem">Ordenar por</label>
+                    <select class="form-select" id="ordem" th:field="*{ordem}" data-autosubmit>
+                        <option value="vencimento">Vencimento (mais próximo)</option>
+                        <option value="vencimento_desc">Vencimento (mais distante)</option>
+                        <option value="nome">Nome (A–Z)</option>
+                        <option value="recentes">Cadastro mais recente</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2 d-flex gap-2">
+                    <button class="btn btn-dark flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                    <button class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#filtrosAvancados"
+                            aria-expanded="false" aria-controls="filtrosAvancados" title="Mais filtros"><i class="bi bi-sliders"></i></button>
+                </div>
+            </div>
+            <div class="collapse" id="filtrosAvancados"
+                 th:classappend="${filtro.vencimentoDe != null or filtro.vencimentoAte != null or (filtro.empresaResponsavel != null and !#strings.isEmpty(filtro.empresaResponsavel))} ? 'show'">
+                <div class="row g-2 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label small" for="empresaResponsavel">Empresa responsável</label>
+                        <input class="form-control" id="empresaResponsavel" th:field="*{empresaResponsavel}" placeholder="Ex.: Filial Centro">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small" for="vencimentoDe">Vencimento de</label>
+                        <input class="form-control" type="date" id="vencimentoDe" th:field="*{vencimentoDe}">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small" for="vencimentoAte">Vencimento até</label>
+                        <input class="form-control" type="date" id="vencimentoAte" th:field="*{vencimentoAte}">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2 small" th:if="${filtro.ativo}">
+                <span class="text-muted">Filtros aplicados.</span> <a th:href="@{/app/documentos}">Limpar filtros</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabela -->
+    <div class="card table-card">
+        <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+        <th:block th:if="${pagina.totalElements == 0}">
+            <th:block th:if="${filtro.ativo}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhum documento encontrado', 'Nenhum documento corresponde à pesquisa ou aos filtros. Altere os critérios ou limpe os filtros para ver todos os documentos.', @{/app/documentos})}"></div>
+            </th:block>
+            <th:block th:unless="${filtro.ativo}" th:with="podeCriar=${#authorization.expression('hasAuthority(''DOC_CREATE'')')}">
+                <div th:replace="~{fragments/ui :: vazioAcao('bi-file-earmark-plus', 'Nenhum documento cadastrado', 'Cadastre alvarás, certidões, contratos, CNHs e certificados para acompanhar a validade e receber alertas automáticos.', 'Cadastrar primeiro documento', ${podeCriar} ? @{/app/documentos/novo} : null)}"></div>
+            </th:block>
+        </th:block>
+        <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+            <table class="table table-hover">
+                <thead><tr>
+                    <th>Documento</th>
+                    <th class="d-none d-md-table-cell">Categoria</th>
+                    <th class="d-none d-lg-table-cell">Responsável</th>
+                    <th>Vencimento</th>
+                    <th>Situação</th>
+                    <th class="text-end"><span class="visually-hidden">Ações</span></th>
+                </tr></thead>
+                <tbody>
+                <tr th:each="d : ${pagina.content}" class="row-link" th:attr="data-href=@{/app/documentos/{id}(id=${d.id})}"
+                    th:with="st=${@dg.status(d)}">
+                    <td>
+                        <a class="doc-name" th:href="@{/app/documentos/{id}(id=${d.id})}" th:text="${d.nome}">Nome</a>
+                        <i th:if="${d.temArquivo()}" class="bi bi-paperclip text-muted ms-1" title="Possui anexo"></i>
+                        <div class="text-muted small">
+                            <span th:if="${d.numero}" th:text="'Nº ' + ${d.numero}"></span>
+                            <span th:if="${d.numero != null and d.empresaResponsavel != null}"> · </span>
+                            <span th:text="${d.empresaResponsavel}"></span>
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell"><span class="cat-chip"><span class="cat-dot" th:style="|background:${d.categoria.cor}|"></span>
+                        <span th:text="${d.categoria.nome}"></span></span></td>
+                    <td class="d-none d-lg-table-cell small">
+                        <span th:if="${d.responsavel}" th:text="${d.responsavel.nome}"></span>
+                        <span th:unless="${d.responsavel}" class="text-muted">—</span>
+                    </td>
+                    <td class="tabular">
+                        <span th:if="${d.dataVencimento}" th:text="${#temporals.format(d.dataVencimento, 'dd/MM/yyyy')}"></span>
+                        <span th:unless="${d.dataVencimento}" class="text-muted">—</span>
+                        <div class="text-muted small" th:if="${d.dataVencimento}" th:text="${@dg.prazo(d)}"></div>
+                    </td>
+                    <td><span th:replace="~{fragments/ui :: status(${st})}"></span></td>
+                    <td class="text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-ghost btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Ações">
+                                <i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" th:href="@{/app/documentos/{id}(id=${d.id})}"><i class="bi bi-eye me-2"></i>Ver detalhes</a></li>
+                                <li sec:authorize="hasAuthority('DOC_EDIT')"><a class="dropdown-item" th:href="@{/app/documentos/{id}/editar(id=${d.id})}">
+                                    <i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                <li th:if="${d.temArquivo()}"><a class="dropdown-item" th:href="@{/app/documentos/{id}/arquivo(id=${d.id},download=true)}">
+                                    <i class="bi bi-download me-2"></i>Baixar anexo</a></li>
+                                <li sec:authorize="hasAuthority('DOC_DELETE')"><hr class="dropdown-divider"></li>
+                                <li sec:authorize="hasAuthority('DOC_DELETE')">
+                                    <form th:action="@{/app/documentos/{id}/excluir(id=${d.id})}" method="post"
+                                          data-confirm-title="Excluir documento"
+                                          th:attr="data-confirm=|O documento &quot;${d.nome}&quot; e seu anexo serão excluídos permanentemente. O histórico de envios será preservado.|"
+                                          data-confirm-button="Excluir">
+                                        <button class="dropdown-item text-danger" type="submit"><i class="bi bi-trash me-2"></i>Excluir</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+    </div>
+</div>
+</body>
+</html>

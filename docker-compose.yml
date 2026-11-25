@@ -1,0 +1,52 @@
+# =====================================================================
+# VIGENTRA - ambiente completo com Docker Compose (OPCIONAL)
+#   cp .env.example .env    (ajuste as senhas)
+#   docker compose up -d --build
+#   Acesse: http://IP-DA-VM:8080
+# O MySQL executa o script.sql automaticamente na primeira inicialização.
+# ATENÇÃO (instalações antigas): um volume criado antes da troca de nome contém o banco
+# "docuguard"; o MySQL não renomeia bancos sozinho. Antes de subir esta versão sobre um
+# volume antigo, siga "Migração de uma instalação DocuGuard" em docs/DEPLOY.md.
+# =====================================================================
+services:
+  db:
+    image: mysql:8.4
+    container_name: vigentra-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: vigentra
+      MYSQL_USER: ${VIGENTRA_DB_USER:-vigentra}
+      MYSQL_PASSWORD: ${VIGENTRA_DB_PASSWORD:?Defina VIGENTRA_DB_PASSWORD no .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-${VIGENTRA_DB_PASSWORD}}
+      TZ: America/Sao_Paulo
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./script.sql:/docker-entrypoint-initdb.d/01-script.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 10
+
+  app:
+    build: .
+    image: vigentra:latest
+    container_name: vigentra-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      VIGENTRA_DB_URL: jdbc:mysql://db:3306/vigentra?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo&characterEncoding=UTF-8
+      APP_STORAGE_DIR: /data/uploads
+      MAIL_DEV_DIR: /data/emails-dev
+      VIGENTRA_LOG_FILE: /data/logs/vigentra.log
+    ports:
+      - "8080:8080"
+    volumes:
+      - app-data:/data
+
+volumes:
+  db-data:
+  app-data:

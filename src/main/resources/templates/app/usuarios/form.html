@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Editar usuário · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/app/usuarios}">Usuários</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Editar</li></ol></nav>
+            <h1>Editar usuário</h1>
+            <p>O usuário acessa somente os dados da sua empresa, conforme o perfil escolhido.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <form th:action="@{/app/usuarios}" th:object="${form}" method="post" class="needs-validation" novalidate id="formUsuario">
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{email}">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex gap-2">
+                    <i class="bi bi-exclamation-circle-fill"></i><div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div></div>
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Dados do usuário</h2></div>
+                    <div class="card-body row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="nome">Nome completo *</label>
+                            <input class="form-control" id="nome" th:field="*{nome}" required minlength="3" maxlength="150"
+                                   th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                            <div class="invalid-feedback">Informe o nome.</div>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label">E-mail (login)</label>
+                            <input class="form-control" th:value="${form.email}" readonly>
+                            <div class="form-text">Somente o próprio usuário altera o e-mail de login (com confirmação no novo endereço).</div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label" for="telefone">Telefone</label>
+                            <input class="form-control" id="telefone" th:field="*{telefone}" data-mask="telefone"
+                                   th:classappend="${#fields.hasErrors('telefone')} ? 'is-invalid'">
+                            <div class="invalid-feedback">Telefone inválido.</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="ativo" th:field="*{ativo}">
+                                <label class="form-check-label" for="ativo">Usuário ativo (pode acessar o sistema)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header"><h2 class="card-title">Nível de acesso</h2></div>
+                    <div class="card-body">
+                        <div class="form-check border rounded-3 p-3 ps-5 mb-2" th:each="p : ${perfis}">
+                            <input class="form-check-input" type="radio" th:field="*{perfil}" th:value="${p.name()}" required>
+                            <label class="form-check-label w-100" th:for="${#ids.prev('perfil')}">
+                                <strong th:text="${p.nome}"></strong>
+                                <span class="d-block text-muted small" th:text="${p.descricao}"></span></label>
+                        </div>
+                        <div class="form-text">As permissões de cada perfil são definidas pelo administrador em Configurações › Permissões.</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <a class="btn btn-light" th:href="@{/app/usuarios}">Cancelar</a>
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header"><h2 class="card-title">Senha</h2></div>
+                <div class="card-body">
+                    <p class="text-muted small">Por segurança, ninguém define a senha de outra pessoa. Envie um link para que o próprio usuário
+                        crie uma nova senha (válido por 30 minutos, uso único).</p>
+                    <form th:action="@{/app/usuarios/{id}/redefinir-senha(id=${form.id})}" method="post"
+                          data-confirm-title="Enviar redefinição de senha" data-confirm-variant="primary" data-confirm-button="Enviar link"
+                          th:attr="data-confirm=|Um link de redefinição será enviado para ${form.email}.|">
+                        <button class="btn btn-light w-100" type="submit"><i class="bi bi-envelope-arrow-up me-1"></i>Enviar link de redefinição de senha</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body small">
+                    <dl class="mb-0">
+                        <dt class="small-caps">E-mail confirmado</dt>
+                        <dd th:text="${usuario.emailVerificado} ? ${#temporals.format(usuario.emailVerificadoEm,'dd/MM/yyyy HH:mm')} : 'Ainda não confirmado'"></dd>
+                        <dt class="small-caps">Último acesso</dt>
+                        <dd th:text="${usuario.ultimoLogin != null} ? ${#temporals.format(usuario.ultimoLogin,'dd/MM/yyyy HH:mm')} : 'Nunca acessou'"></dd>
+                        <dt class="small-caps">Canais aceitos</dt>
+                        <dd class="mb-0">
+                            <span class="status-badge" th:classappend="${usuario.preferencias.receberEmail} ? 'status-success' : 'status-secondary'">E-mail</span>
+                            <span class="status-badge" th:classappend="${usuario.preferencias.receberWhatsapp and usuario.preferencias.whatsappConsentimentoEm != null} ? 'status-success' : 'status-secondary'">WhatsApp</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

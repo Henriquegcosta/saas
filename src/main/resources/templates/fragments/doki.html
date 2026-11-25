@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--/* Doki - assistente virtual do VIGENTRA. Incluído no layout da área logada (fragments/layout).
+     Sem scripts inline (CSP): o comportamento está em /js/doki.js. */-->
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="doki" sec:authorize="isAuthenticated()" th:if="${usuarioLogado}" class="doki" id="doki"
+     th:data-api="@{/app/api/doki/mensagens}" th:data-base="@{/}"
+     th:data-usuario="${usuarioLogado.id}" th:data-nome="${usuarioLogado.primeiroNome}">
+
+    <button class="doki-fab" type="button" aria-controls="dokiPainel" aria-expanded="false"
+            aria-label="Abrir o Doki, assistente virtual" title="Fale com o Doki">
+        <img th:src="@{/img/doki.svg}" alt="" width="40" height="40">
+    </button>
+
+    <section class="doki-painel" id="dokiPainel" role="dialog" aria-labelledby="dokiTitulo" aria-describedby="dokiSlogan" hidden>
+        <header class="doki-head">
+            <img class="doki-avatar" th:src="@{/img/doki.svg}" alt="" width="44" height="44">
+            <div class="doki-identidade">
+                <h2 class="doki-nome" id="dokiTitulo">Doki <span class="doki-online">assistente virtual</span></h2>
+                <p class="doki-slogan" id="dokiSlogan">O Doki está de olho. Seus documentos, sempre protegidos.</p>
+            </div>
+            <button class="doki-icone" type="button" data-doki-limpar aria-label="Iniciar nova conversa" title="Nova conversa">
+                <i class="bi bi-arrow-counterclockwise"></i></button>
+            <button class="doki-icone" type="button" data-doki-fechar aria-label="Fechar o Doki" title="Fechar">
+                <i class="bi bi-x-lg"></i></button>
+        </header>
+
+        <div class="doki-mensagens" id="dokiMensagens" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+        <form class="doki-form" id="dokiForm" data-no-loading autocomplete="off">
+            <label class="visually-hidden" for="dokiPergunta">Pergunte ao Doki</label>
+            <input class="form-control" id="dokiPergunta" type="text" maxlength="500" placeholder="Pergunte ao Doki..." required>
+            <button class="btn btn-primary doki-enviar" type="submit" aria-label="Enviar pergunta" title="Enviar">
+                <i class="bi bi-send-fill"></i></button>
+        </form>
+        <div class="doki-rodape"><i class="bi bi-shield-lock me-1"></i>Respostas com base apenas nos dados da sua empresa</div>
+    </section>
+</div>
+</body>
+</html>

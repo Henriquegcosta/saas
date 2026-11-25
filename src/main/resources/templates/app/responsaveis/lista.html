@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Responsáveis · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item">Administração</li>
+                <li class="breadcrumb-item active" aria-current="page">Responsáveis</li></ol></nav>
+            <h1>Responsáveis pelos documentos</h1>
+            <p>Pessoas que respondem pelos documentos e recebem os alertas de vencimento por e-mail.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/app/responsaveis/novo}"><i class="bi bi-person-plus me-1"></i>Novo responsável</a>
+    </div>
+
+    <form class="card mb-3" th:action="@{/app/responsaveis}" method="get" data-no-loading>
+        <div class="card-body d-flex gap-2">
+            <input class="form-control" name="q" type="search" th:value="${q}" placeholder="Pesquisar por nome, e-mail ou cargo" aria-label="Pesquisar">
+            <button class="btn btn-dark" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+
+    <div class="card table-card">
+        <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+        <th:block th:if="${pagina.totalElements == 0}">
+            <th:block th:if="${!#strings.isEmpty(#strings.trim(q))}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhum responsável encontrado', 'Nenhum responsável corresponde à pesquisa. Confira o nome, o e-mail ou o cargo digitado.', @{/app/responsaveis})}"></div>
+            </th:block>
+            <th:block th:if="${#strings.isEmpty(#strings.trim(q))}">
+                <div th:replace="~{fragments/ui :: vazioAcao('bi-person-vcard', 'Nenhum responsável cadastrado', 'Cadastre as pessoas que respondem pelos documentos. Eles também são criados automaticamente ao informar nome e e-mail no cadastro de documentos.', 'Cadastrar responsável', @{/app/responsaveis/novo})}"></div>
+            </th:block>
+        </th:block>
+        <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+            <table class="table table-hover">
+                <thead><tr><th>Responsável</th><th class="d-none d-md-table-cell">Cargo</th><th class="d-none d-lg-table-cell">Usuário vinculado</th>
+                    <th class="text-end">Documentos</th><th>Situação</th><th class="text-end"></th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${pagina.content}" th:with="qtd=${svc.contarDocumentos(r.id)}">
+                    <td><div class="fw-semibold" th:text="${r.nome}"></div><div class="text-muted small" th:text="${r.email}"></div></td>
+                    <td class="d-none d-md-table-cell small" th:text="${r.cargo ?: '—'}"></td>
+                    <td class="d-none d-lg-table-cell small">
+                        <span th:if="${r.usuario}"><i class="bi bi-person-check text-success me-1"></i><span th:text="${r.usuario.nome}"></span></span>
+                        <span th:unless="${r.usuario}" class="text-muted">—</span>
+                    </td>
+                    <td class="text-end tabular"><a th:href="@{/app/documentos(responsavelId=${r.id})}" th:text="${qtd}"></a></td>
+                    <td><span th:if="${r.ativo}" class="status-badge status-success">Ativo</span>
+                        <span th:unless="${r.ativo}" class="status-badge status-secondary">Inativo</span></td>
+                    <td class="text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-ghost btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="Ações"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" th:href="@{/app/responsaveis/{id}/editar(id=${r.id})}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                <li><a class="dropdown-item" th:href="@{/app/documentos(responsavelId=${r.id})}"><i class="bi bi-files me-2"></i>Ver documentos</a></li>
+                                <li>
+                                    <form th:action="@{/app/responsaveis/{id}/status(id=${r.id})}" method="post"
+                                          th:attr="data-confirm=${r.ativo} ? |${r.nome} deixará de receber alertas por e-mail.| : |${r.nome} voltará a receber alertas.|,
+                                                   data-confirm-title=${r.ativo} ? 'Desativar responsável' : 'Reativar responsável',
+                                                   data-confirm-variant=${r.ativo} ? 'danger' : 'primary'">
+                                        <button class="dropdown-item" type="submit" th:text="${r.ativo} ? 'Desativar' : 'Reativar'"></button>
+                                    </form>
+                                </li>
+                                <li th:if="${qtd == 0}"><hr class="dropdown-divider"></li>
+                                <li th:if="${qtd == 0}">
+                                    <form th:action="@{/app/responsaveis/{id}/excluir(id=${r.id})}" method="post" data-confirm-title="Excluir responsável"
+                                          data-confirm-button="Excluir" th:attr="data-confirm=|${r.nome} será excluído permanentemente.|">
+                                        <button class="dropdown-item text-danger" type="submit"><i class="bi bi-trash me-2"></i>Excluir</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+    </div>
+</div>
+</body>
+</html>

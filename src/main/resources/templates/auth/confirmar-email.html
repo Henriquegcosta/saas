@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Confirmar e-mail · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <a class="d-flex d-lg-none align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <div class="empty-state p-0 text-start">
+        <div class="icon mx-0"><i class="bi bi-envelope-check"></i></div>
+    </div>
+    <h1 th:text="${tipo == 'alteracao'} ? 'Confirmar novo e-mail' : 'Confirmar e-mail'">Confirmar e-mail</h1>
+
+    <div th:if="${erro}" class="alert alert-danger d-flex gap-2 mt-3"><i class="bi bi-exclamation-circle-fill"></i><span th:text="${erro}"></span></div>
+
+    <th:block th:if="${tokenValido}">
+        <p class="sub" th:if="${tipo != 'alteracao'}">Falta só um passo: confirme que este endereço é seu para ativar o acesso ao VIGENTRA.</p>
+        <p class="sub" th:if="${tipo == 'alteracao'}">Confirme para que este passe a ser o e-mail de login da sua conta.</p>
+        <form th:action="${tipo == 'alteracao'} ? @{/confirmar-email/alteracao} : @{/confirmar-email}" method="post">
+            <input type="hidden" name="token" th:value="${token}">
+            <button class="btn btn-primary btn-lg w-100" type="submit" data-loading-text="Confirmando...">
+                <i class="bi bi-check2-circle me-1"></i> Confirmar e-mail</button>
+        </form>
+    </th:block>
+
+    <th:block th:unless="${tokenValido}">
+        <div class="alert alert-warning d-flex gap-2 mt-3"><i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Este link é inválido, expirou ou já foi utilizado.</span></div>
+        <p class="text-muted small">Se você já confirmou, basta entrar. Caso contrário, entre com seu e-mail e senha
+            e solicite um novo link de confirmação.</p>
+        <a class="btn btn-primary w-100" th:href="@{/login}">Ir para o login</a>
+    </th:block>
+</div>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title th:text="${doc.nome} + ' · VIGENTRA'">Documento</title></head>
+<body>
+<div id="conteudo" th:with="st=${@dg.status(doc)}">
+    <div class="page-header">
+        <div class="min-w-0">
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/app/documentos}">Documentos</a></li>
+                <li class="breadcrumb-item active text-truncate" aria-current="page" th:text="${doc.nome}"></li></ol></nav>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <h1 class="text-break" th:text="${doc.nome}">Documento</h1>
+                <span th:replace="~{fragments/ui :: status(${st})}"></span>
+            </div>
+            <p class="d-flex flex-wrap gap-3">
+                <span class="cat-chip"><span class="cat-dot" th:style="|background:${doc.categoria.cor}|"></span><span th:text="${doc.categoria.nome}"></span></span>
+                <span th:if="${doc.numero}"><i class="bi bi-hash"></i><span th:text="${doc.numero}"></span></span>
+                <span><i class="bi bi-clock me-1"></i><span th:text="${@dg.prazo(doc)}"></span></span>
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-light" th:href="@{/app/documentos}"><i class="bi bi-arrow-left me-1"></i>Voltar</a>
+            <a sec:authorize="hasAuthority('DOC_EDIT')" class="btn btn-primary" th:href="@{/app/documentos/{id}/editar(id=${doc.id})}">
+                <i class="bi bi-pencil me-1"></i>Editar</a>
+            <form sec:authorize="hasAuthority('DOC_DELETE')" th:action="@{/app/documentos/{id}/excluir(id=${doc.id})}" method="post"
+                  data-confirm-title="Excluir documento" data-confirm-button="Excluir"
+                  th:attr="data-confirm=|O documento &quot;${doc.nome}&quot; e seu anexo serão excluídos permanentemente. Esta ação não pode ser desfeita.|">
+                <button class="btn btn-soft-danger" type="submit"><i class="bi bi-trash me-1"></i>Excluir</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alerta contextual -->
+    <div class="alert d-flex gap-2 align-items-center mb-4" th:if="${st.name() != 'REGULAR'}"
+         th:classappend="${st.name() == 'VENCIDO'} ? 'alert-danger' : (${st.name() == 'PROXIMO_VENCIMENTO'} ? 'alert-warning' : 'alert-secondary')">
+        <i class="bi fs-5" th:classappend="${st.icone}"></i>
+        <div th:switch="${st.name()}">
+            <span th:case="'VENCIDO'"><strong>Documento vencido.</strong> Providencie a renovação e atualize a data de vencimento para interromper os alertas.</span>
+            <span th:case="'PROXIMO_VENCIMENTO'"><strong>Atenção:</strong> este documento está próximo do vencimento. Os responsáveis estão sendo avisados conforme a régua de alertas.</span>
+            <span th:case="*">Este documento não possui data de vencimento e não gera alertas.</span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header"><h2 class="card-title">Informações</h2></div>
+                <div class="card-body">
+                    <dl class="dl-grid mb-0">
+                        <div><dt>Data de emissão</dt><dd th:text="${doc.dataEmissao != null} ? ${#temporals.format(doc.dataEmissao,'dd/MM/yyyy')} : '—'"></dd></div>
+                        <div><dt>Data de vencimento</dt><dd th:text="${doc.dataVencimento != null} ? ${#temporals.format(doc.dataVencimento,'dd/MM/yyyy')} : 'Sem vencimento'"></dd></div>
+                        <div><dt>Prazo</dt><dd th:text="${@dg.prazo(doc)}"></dd></div>
+                        <div><dt>Categoria</dt><dd th:text="${doc.categoria.nome}"></dd></div>
+                        <div><dt>Número / identificação</dt><dd th:text="${doc.numero ?: '—'}"></dd></div>
+                        <div><dt>Empresa responsável</dt><dd th:text="${doc.empresaResponsavel ?: '—'}"></dd></div>
+                        <div><dt>Cadastrado em</dt><dd th:text="${#temporals.format(doc.createdAt,'dd/MM/yyyy HH:mm')}"></dd></div>
+                        <div><dt>Última atualização</dt><dd th:text="${#temporals.format(doc.updatedAt,'dd/MM/yyyy HH:mm')}"></dd></div>
+                        <div><dt>Cadastrado por</dt><dd th:text="${doc.criadoPor != null} ? ${doc.criadoPor.nome} : '—'"></dd></div>
+                    </dl>
+                    <hr th:if="${doc.descricao != null or doc.observacoes != null}">
+                    <div th:if="${doc.descricao}" class="mb-3">
+                        <div class="small-caps mb-1">Descrição</div>
+                        <p class="mb-0" style="white-space: pre-line" th:text="${doc.descricao}"></p>
+                    </div>
+                    <div th:if="${doc.observacoes}">
+                        <div class="small-caps mb-1">Observações</div>
+                        <p class="mb-0" style="white-space: pre-line" th:text="${doc.observacoes}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div><h2 class="card-title">Anexo</h2>
+                        <div class="card-subtitle" th:if="${doc.temArquivo()}" th:text="${doc.arquivoNomeOriginal} + ' · ' + ${@dg.bytes(doc.arquivoTamanho)}"></div></div>
+                    <div class="d-flex gap-2" th:if="${doc.temArquivo()}">
+                        <a class="btn btn-sm btn-light" th:href="@{/app/documentos/{id}/arquivo(id=${doc.id})}" target="_blank" rel="noopener">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Abrir</a>
+                        <a class="btn btn-sm btn-light" th:href="@{/app/documentos/{id}/arquivo(id=${doc.id},download=true)}">
+                            <i class="bi bi-download me-1"></i>Baixar</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <th:block th:unless="${doc.temArquivo()}">
+                        <div th:replace="~{fragments/ui :: vazioCompacto('bi-file-earmark-x', 'Nenhum arquivo anexado', 'Anexe o PDF ou a imagem do documento para consultá-lo aqui.')}"></div>
+                        <div class="text-center pb-3" sec:authorize="hasAuthority('DOC_EDIT')">
+                            <a class="btn btn-sm btn-light" th:href="@{/app/documentos/{id}/editar(id=${doc.id})}"><i class="bi bi-paperclip me-1"></i>Anexar arquivo</a>
+                        </div>
+                    </th:block>
+                    <th:block th:if="${doc.temArquivo()}">
+                        <img th:if="${@dg.imagem(doc)}" class="preview-img w-100" th:src="@{/app/documentos/{id}/arquivo(id=${doc.id})}" th:alt="${doc.arquivoNomeOriginal}">
+                        <iframe th:unless="${@dg.imagem(doc)}" class="preview-frame" th:src="@{/app/documentos/{id}/arquivo(id=${doc.id})}"
+                                th:title="${doc.arquivoNomeOriginal}"></iframe>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header"><h2 class="card-title">Responsável</h2></div>
+                <div class="card-body">
+                    <div th:if="${doc.responsavel}" class="d-flex align-items-center gap-3">
+                        <span class="avatar" th:text="${#strings.substring(doc.responsavel.nome,0,1)}">R</span>
+                        <div class="min-w-0">
+                            <div class="fw-semibold" th:text="${doc.responsavel.nome}"></div>
+                            <div class="text-muted small text-truncate" th:text="${doc.responsavel.email}"></div>
+                            <div class="text-muted small" th:if="${doc.responsavel.cargo}" th:text="${doc.responsavel.cargo}"></div>
+                        </div>
+                    </div>
+                    <div th:unless="${doc.responsavel}" class="text-muted small">
+                        <i class="bi bi-exclamation-triangle text-warning me-1"></i>Nenhum responsável definido. Somente gestores receberão os alertas.</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Alertas enviados</h2>
+                    <div class="card-subtitle">Histórico de e-mails deste documento</div></div>
+                <th:block th:if="${#lists.isEmpty(envios)}">
+                    <div th:replace="~{fragments/ui :: vazioCompacto('bi-envelope', 'Nenhum alerta enviado',
+                         ${doc.dataVencimento != null} ? 'Os alertas são gerados pela rotina diária de verificação.' : 'Documentos sem vencimento não geram alertas.')}"></div>
+                </th:block>
+                <ul class="timeline" th:unless="${#lists.isEmpty(envios)}">
+                    <li th:each="h : ${envios}">
+                        <span class="t-icon" th:classappend="${h.status.cor}"><i class="bi bi-envelope"></i></span>
+                        <div class="min-w-0">
+                            <div class="small fw-semibold" th:text="${h.periodoLabel}"></div>
+                            <div class="text-muted small text-truncate" th:text="${h.destinatario}"></div>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <span th:replace="~{fragments/ui :: statusEnvio(${h.status})}"></span>
+                                <span class="text-muted" style="font-size:.72rem" th:text="${#temporals.format(h.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="text-danger small mt-1" th:if="${h.ultimoErro}" th:text="${h.ultimoErro}"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

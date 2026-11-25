@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{email/base :: layout('#2563EB', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#0B1F3A">Você foi convidado para o VIGENTRA</h1>
+    <p style="margin:0 0 12px">Olá<span th:if="${nome != ''}" th:text="', ' + ${nome}"></span>.</p>
+    <p style="margin:0 0 16px"><strong th:text="${convidante}">Fulano</strong> convidou você para acompanhar os documentos da empresa
+        <strong th:text="${empresaNome}">Empresa</strong> no VIGENTRA.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E2E8F0;border-radius:10px;background:#F8FAFC">
+        <tr><td style="padding:14px 18px;font-size:14px">
+            <span style="color:#64748B">Perfil de acesso:</span> <strong th:text="${perfil}">Usuário</strong><br>
+            <span style="font-size:13px;color:#64748B" th:text="${perfilDescricao}"></span>
+        </td></tr>
+    </table>
+    <table th:replace="~{email/botao :: botao(${link}, 'Aceitar convite e criar senha', '#2563EB')}"></table>
+    <p style="margin:0 0 18px;font-size:13px;color:#64748B">O convite vale até <strong th:text="${validade}">data</strong> e só pode ser usado
+        uma vez. Se você não esperava este convite, ignore a mensagem.</p>
+    <p th:replace="~{email/botao :: linkAlternativo(${link})}"></p>
+</div>
+</body>
+</html>

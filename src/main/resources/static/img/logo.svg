@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="VIGENTRA">
+  <defs>
+    <linearGradient id="dg-a" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 3 8 12v18c0 15.4 10.2 26.6 24 31 13.8-4.4 24-15.6 24-31V12L32 3Z" fill="url(#dg-a)"/>
+  <path d="M23 18h13l7 7v19a2 2 0 0 1-2 2H23a2 2 0 0 1-2-2V20a2 2 0 0 1 2-2Z" fill="#fff" fill-opacity=".95"/>
+  <path d="M36 18v6a1 1 0 0 0 1 1h6" fill="#BFDBFE"/>
+  <path d="m26.5 33.5 4 4 7.5-8" stroke="#16A34A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

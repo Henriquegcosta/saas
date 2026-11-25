@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{email/base :: layout('#16A34A', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <h1 style="margin:0 0 14px;font-size:23px;line-height:1.3;color:#0B1F3A">Boas-vindas, <span th:text="${nome}">Nome</span>! 👋</h1>
+    <p style="margin:0 0 16px">Seu acesso à empresa <strong th:text="${empresaNome}">Empresa</strong> está ativo, com o perfil
+        <strong th:text="${perfil}">Administrador</strong>. O VIGENTRA acompanha a validade dos seus documentos e avisa os
+        responsáveis antes que algo vença — por e-mail e, se você quiser, pelo WhatsApp.</p>
+
+    <p style="margin:0 0 8px;font-weight:700;color:#0B1F3A">Primeiros passos</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 6px">
+        <tr>
+            <td style="width:34px;vertical-align:top;padding:8px 0"><span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#EFF6FF;color:#2563EB;font-weight:700;font-size:13px">1</span></td>
+            <td style="padding:8px 0"><strong>Cadastre os documentos críticos</strong><br>
+                <span style="font-size:13px;color:#64748B">Alvará, certidões negativas, certificado digital, contratos e CNHs — com a data de vencimento e o arquivo.</span></td>
+        </tr>
+        <tr>
+            <td style="width:34px;vertical-align:top;padding:8px 0"><span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#EFF6FF;color:#2563EB;font-weight:700;font-size:13px">2</span></td>
+            <td style="padding:8px 0"><strong>Defina os responsáveis</strong><br>
+                <span style="font-size:13px;color:#64748B">Cada documento tem alguém que recebe os avisos. <a th:href="${linkResponsaveis}" style="color:#2563EB">Gerenciar responsáveis</a>.</span></td>
+        </tr>
+        <tr>
+            <td style="width:34px;vertical-align:top;padding:8px 0"><span style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#EFF6FF;color:#2563EB;font-weight:700;font-size:13px">3</span></td>
+            <td style="padding:8px 0"><strong>Escolha como quer ser avisado</strong><br>
+                <span style="font-size:13px;color:#64748B">E-mail, WhatsApp e tipos de alerta em <a th:href="${linkPreferencias}" style="color:#2563EB">Preferências de notificação</a>.</span></td>
+        </tr>
+    </table>
+    <table th:replace="~{email/botao :: botao(${linkDocumento}, 'Cadastrar o primeiro documento', '#16A34A')}"></table>
+    <p style="margin:0;font-size:13px;color:#64748B">Os avisos saem automaticamente 30, 15 e 7 dias antes, no dia e após o vencimento.
+        Você pode acompanhar tudo pelo <a th:href="${linkPainel}" style="color:#2563EB">painel</a>.</p>
+</div>
+</body>
+</html>

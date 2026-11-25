@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Usuários · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item">Administração</li>
+                <li class="breadcrumb-item active" aria-current="page">Usuários</li></ol></nav>
+            <h1>Usuários</h1>
+            <p>Gerencie quem acessa o ambiente da empresa e com qual nível de permissão.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a sec:authorize="hasRole('ADMIN')" class="btn btn-light" th:href="@{/app/configuracoes(aba='permissoes')}">
+                <i class="bi bi-shield-lock me-1"></i>Permissões</a>
+            <a sec:authorize="hasAuthority('AUDIT_VIEW')" class="btn btn-light" th:href="@{/app/atividades}">
+                <i class="bi bi-clock-history me-1"></i>Atividades</a>
+            <a class="btn btn-primary" th:href="@{/app/usuarios/convidar}"><i class="bi bi-person-plus me-1"></i>Convidar usuário</a>
+        </div>
+    </div>
+
+    <form class="card mb-3" th:action="@{/app/usuarios}" method="get" data-no-loading>
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small" for="q">Pesquisar</label>
+                <input class="form-control" id="q" name="q" type="search" th:value="${q}" placeholder="Nome ou e-mail">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small" for="perfil">Perfil</label>
+                <select class="form-select" id="perfil" name="perfil" data-autosubmit>
+                    <option value="">Todos</option>
+                    <option th:each="p : ${perfis}" th:value="${p.name()}" th:text="${p.nome}" th:selected="${perfil == p}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small" for="ativo">Situação</label>
+                <select class="form-select" id="ativo" name="ativo" data-autosubmit>
+                    <option value="">Todos</option>
+                    <option value="true" th:selected="${ativo != null and ativo}">Ativos</option>
+                    <option value="false" th:selected="${ativo != null and !ativo}">Desativados</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid"><button class="btn btn-dark" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button></div>
+        </div>
+    </form>
+
+    <!-- Convites pendentes -->
+    <div class="card table-card mb-4" th:unless="${#lists.isEmpty(convites)}">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div><h2 class="card-title">Convites pendentes</h2><div class="card-subtitle">Pessoas que ainda não aceitaram o convite</div></div>
+            <span class="status-badge status-primary" th:text="${#lists.size(convites)}"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>Convidado</th><th>Perfil</th><th class="d-none d-md-table-cell">Convidado por</th><th>Validade</th><th class="text-end"></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${convites}" th:with="situacao=${c.getSituacao(agora)}">
+                    <td><div class="fw-semibold" th:text="${c.nome != null} ? ${c.nome} : ${c.email}"></div>
+                        <div class="text-muted small" th:if="${c.nome != null}" th:text="${c.email}"></div></td>
+                    <td><span class="status-badge status-secondary" th:text="${c.perfil.nome}"></span></td>
+                    <td class="d-none d-md-table-cell small" th:text="${c.convidadoPor != null} ? ${c.convidadoPor.nome} : '—'"></td>
+                    <td class="small">
+                        <span th:if="${situacao == 'PENDENTE'}" th:text="'até ' + ${#temporals.format(c.expiraEm,'dd/MM/yyyy HH:mm')}"></span>
+                        <span th:if="${situacao == 'EXPIRADO'}" class="status-badge status-warning">Expirado</span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <form class="d-inline" th:action="@{/app/usuarios/convites/{id}/reenviar(id=${c.id})}" method="post">
+                            <button class="btn btn-sm btn-light" type="submit" data-loading-text="Enviando..."><i class="bi bi-arrow-repeat me-1"></i>Reenviar</button>
+                        </form>
+                        <form class="d-inline" th:action="@{/app/usuarios/convites/{id}/cancelar(id=${c.id})}" method="post"
+                              data-confirm-title="Cancelar convite" data-confirm-button="Cancelar convite"
+                              th:attr="data-confirm=|O link enviado para ${c.email} deixará de funcionar.|">
+                            <button class="btn btn-sm btn-soft-danger" type="submit" aria-label="Cancelar convite"><i class="bi bi-x-lg"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <!--/* A condição fica num elemento EXTERNO: no Thymeleaf o th:replace é processado antes do th:if,
+             e os dois no mesmo elemento faziam a mensagem aparecer sempre, mesmo com resultados. */-->
+        <th:block th:if="${pagina.totalElements == 0}"
+                  th:with="filtrado=${!#strings.isEmpty(#strings.trim(q)) or perfil != null or ativo != null}">
+            <th:block th:if="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhum usuário encontrado', 'Ajuste os filtros ou cadastre um novo usuário.', @{/app/usuarios})}"></div>
+            </th:block>
+            <th:block th:unless="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazio('bi-people', 'Nenhum usuário cadastrado', 'Convide pessoas da sua empresa para acessar o sistema.')}"></div>
+            </th:block>
+        </th:block>
+        <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+            <table class="table table-hover">
+                <thead><tr><th>Usuário</th><th>Perfil</th><th class="d-none d-md-table-cell">Último acesso</th><th>Situação</th><th class="text-end"></th></tr></thead>
+                <tbody>
+                <tr th:each="u : ${pagina.content}" th:with="pode=${svc.podeGerenciar(u)}, eu=${u.id == usuarioLogado.id}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" th:text="${u.iniciais}"></span>
+                            <div class="min-w-0">
+                                <div class="fw-semibold"><span th:text="${u.nome}"></span>
+                                    <span th:if="${eu}" class="badge text-bg-light border ms-1">você</span></div>
+                                <div class="text-muted small text-truncate" th:text="${u.email}"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="status-badge" th:classappend="${u.perfil.codigo.name() == 'ADMIN'} ? 'status-primary' : (${u.perfil.codigo.name() == 'GESTOR'} ? 'status-info' : 'status-secondary')"
+                              th:text="${u.perfil.nome}"></span></td>
+                    <td class="d-none d-md-table-cell small text-muted tabular"
+                        th:text="${u.ultimoLogin != null} ? ${#temporals.format(u.ultimoLogin,'dd/MM/yyyy HH:mm')} : 'Nunca acessou'"></td>
+                    <td>
+                        <span th:if="${u.ativo}" class="status-badge status-success">Ativo</span>
+                        <span th:unless="${u.ativo}" class="status-badge status-secondary">Desativado</span>
+                    </td>
+                    <td class="text-end">
+                        <div class="dropdown" th:if="${pode}">
+                            <button class="btn btn-ghost btn-icon btn-sm" type="button" data-bs-toggle="dropdown" aria-label="Ações"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" th:href="@{/app/usuarios/{id}/editar(id=${u.id})}"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                <li sec:authorize="hasAuthority('AUDIT_VIEW')"><a class="dropdown-item" th:href="@{/app/atividades(usuarioId=${u.id})}">
+                                    <i class="bi bi-clock-history me-2"></i>Consultar atividades</a></li>
+                                <li>
+                                    <form th:action="@{/app/usuarios/{id}/status(id=${u.id})}" method="post"
+                                          th:attr="data-confirm=${u.ativo} ? |${u.nome} não poderá mais acessar o sistema e suas sessões serão encerradas.| : |${u.nome} voltará a ter acesso ao sistema.|,
+                                                   data-confirm-title=${u.ativo} ? 'Desativar usuário' : 'Reativar usuário',
+                                                   data-confirm-button=${u.ativo} ? 'Desativar' : 'Reativar',
+                                                   data-confirm-variant=${u.ativo} ? 'danger' : 'primary'">
+                                        <button class="dropdown-item" type="submit">
+                                            <i class="bi me-2" th:classappend="${u.ativo} ? 'bi-person-slash' : 'bi-person-check'"></i>
+                                            <span th:text="${u.ativo} ? 'Desativar' : 'Reativar'"></span></button>
+                                    </form>
+                                </li>
+                                <li sec:authorize="hasRole('ADMIN')"><hr class="dropdown-divider"></li>
+                                <li sec:authorize="hasRole('ADMIN')">
+                                    <form th:action="@{/app/usuarios/{id}/excluir(id=${u.id})}" method="post" data-confirm-title="Excluir usuário"
+                                          data-confirm-button="Excluir definitivamente"
+                                          th:attr="data-confirm=|${u.nome} será excluído permanentemente. Os registros de auditoria serão mantidos com o nome do usuário. Prefira desativar se houver dúvida.|">
+                                        <button class="dropdown-item text-danger" type="submit"><i class="bi bi-trash me-2"></i>Excluir</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <span th:if="${!pode and !eu}" class="text-muted small" title="Seu perfil não permite gerenciar este usuário"><i class="bi bi-lock"></i></span>
+                        <a th:if="${eu}" class="btn btn-sm btn-light" th:href="@{/app/configuracoes(aba='perfil')}">Meu perfil</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+    </div>
+</div>
+</body>
+</html>

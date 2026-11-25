@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{email/base :: layout('#D97706', ~{::corpo})}">
+<body>
+<div th:fragment="corpo">
+    <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3;color:#0B1F3A">Sua senha foi alterada</h1>
+    <p style="margin:0 0 12px">Olá, <strong th:text="${nome}">Nome</strong>.</p>
+    <p style="margin:0 0 16px">A senha da sua conta no VIGENTRA foi alterada em <strong th:text="${quando}">data</strong>
+        (IP <span th:text="${ip}">0.0.0.0</span>). Por segurança, as sessões abertas em outros dispositivos foram encerradas.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #FDE68A;border-radius:10px;background:#FFFBEB">
+        <tr><td style="padding:14px 18px;font-size:14px;color:#92400E">
+            <strong>Não foi você?</strong> Redefina sua senha imediatamente e avise o administrador da sua empresa.
+        </td></tr>
+    </table>
+    <table th:replace="~{email/botao :: botao(${linkRecuperar}, 'Redefinir minha senha', '#D97706')}"></table>
+    <p style="margin:0;font-size:13px;color:#64748B">Se foi você, nenhuma ação é necessária.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Descadastrar · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <a class="d-flex align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+    <th:block th:unless="${concluido}">
+        <h1>Parar de receber alertas por e-mail?</h1>
+        <p class="sub"><strong th:text="${titular.email()}"></strong> deixará de receber os avisos de vencimento de documentos
+            da empresa <strong th:text="${titular.empresa()}"></strong>.</p>
+        <form th:action="@{/preferencias/descadastrar(a=${a},id=${id},t=${t})}" method="post">
+            <button class="btn btn-danger w-100 btn-lg" type="submit">Sim, não quero mais receber</button>
+        </form>
+        <a class="btn btn-light w-100 mt-2" th:href="@{/preferencias(a=${a},id=${id},t=${t})}">Prefiro ajustar minhas preferências</a>
+    </th:block>
+    <th:block th:if="${concluido}">
+        <h1>Pronto, você foi descadastrado</h1>
+        <div class="alert alert-success d-flex gap-2"><i class="bi bi-check-circle-fill"></i>
+            <span>Os alertas por e-mail para <strong th:text="${titular.email()}"></strong> foram desativados.</span></div>
+        <p class="text-muted small">Atenção: sem os avisos, documentos sob sua responsabilidade podem vencer sem que você seja lembrado.
+            Você pode reativar quando quiser.</p>
+        <a class="btn btn-light w-100" th:href="@{${linkPreferencias}}">Gerenciar preferências</a>
+    </th:block>
+</div>
+</body>
+</html>

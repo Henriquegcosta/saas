@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Notificações · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Notificações</li></ol></nav>
+            <h1>Notificações</h1>
+            <p>Alertas de vencimento e histórico dos e-mails enviados pela rotina automática.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <form th:if="${aba == 'minhas' and notificacoesNaoLidas > 0}" th:action="@{/app/notificacoes/marcar-todas}" method="post">
+                <button class="btn btn-light" type="submit"><i class="bi bi-check2-all me-1"></i>Marcar todas como lidas</button>
+            </form>
+            <form sec:authorize="hasAuthority('NOTIF_MANAGE')" th:action="@{/app/notificacoes/executar}" method="post"
+                  data-confirm-title="Executar verificação agora" data-confirm-variant="primary" data-confirm-button="Executar"
+                  data-confirm="A rotina de alertas será executada agora para a sua empresa. Somente alertas ainda não enviados para o período atual serão disparados (sem duplicidade).">
+                <button class="btn btn-primary" type="submit" data-loading-text="Verificando..."><i class="bi bi-arrow-repeat me-1"></i>Executar verificação agora</button>
+            </form>
+        </div>
+    </div>
+
+    <ul class="nav nav-underline mb-3">
+        <li class="nav-item"><a class="nav-link" th:classappend="${aba == 'minhas'} ? 'active'" th:href="@{/app/notificacoes}">
+            <i class="bi bi-bell me-1"></i>Minhas notificações
+            <span class="badge rounded-pill text-bg-danger ms-1" th:if="${notificacoesNaoLidas > 0}" th:text="${notificacoesNaoLidas}"></span></a></li>
+        <li class="nav-item" sec:authorize="hasAnyAuthority('NOTIF_MANAGE','DOC_VIEW_ALL')">
+            <a class="nav-link" th:classappend="${aba == 'envios'} ? 'active'" th:href="@{/app/notificacoes/envios}">
+                <i class="bi bi-envelope-paper me-1"></i>Alertas enviados (e-mail)</a></li>
+    </ul>
+
+    <!-- ===================== MINHAS NOTIFICAÇÕES ===================== -->
+    <th:block th:if="${aba == 'minhas'}">
+        <div class="filter-bar mb-3">
+            <div class="seg-tabs">
+                <a th:with="dgUrl=${@dg.comParametro('lida', null)}" th:href="${dgUrl}" th:classappend="${lida == null} ? 'active'">Todas</a>
+                <a th:with="dgUrl=${@dg.comParametro('lida', false)}" th:href="${dgUrl}" th:classappend="${lida != null and !lida} ? 'active'">Não lidas</a>
+                <a th:with="dgUrl=${@dg.comParametro('lida', true)}" th:href="${dgUrl}" th:classappend="${lida != null and lida} ? 'active'">Lidas</a>
+            </div>
+            <div class="seg-tabs">
+                <a th:with="dgUrl=${@dg.comParametro('tipo', null)}" th:href="${dgUrl}" th:classappend="${tipo == null} ? 'active'">Todos os tipos</a>
+                <a th:each="t : ${tipos}" th:with="dgUrl=${@dg.comParametro('tipo', t.name())}" th:href="${dgUrl}" th:classappend="${tipo == t} ? 'active'" th:text="${t.label}"></a>
+            </div>
+        </div>
+        <div class="card">
+            <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+            <th:block th:if="${pagina.totalElements == 0 and (lida != null or tipo != null)}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-funnel', 'Nenhuma notificação encontrada', 'Não há notificações para a situação ou o tipo selecionado.', @{/app/notificacoes})}"></div>
+            </th:block>
+            <th:block th:if="${pagina.totalElements == 0 and lida == null and tipo == null}">
+                <div th:replace="~{fragments/ui :: vazio('bi-bell-slash', 'Nenhuma notificação', 'Quando um documento sob sua responsabilidade estiver perto de vencer ou vencido, o aviso aparecerá aqui.')}"></div>
+            </th:block>
+            <div th:each="n : ${pagina.content}" class="d-flex gap-3 align-items-start px-3 py-3 border-bottom"
+                 th:classappend="${!n.lida} ? 'bg-primary-subtle bg-opacity-25' : ''">
+                <span class="notif-icon" th:classappend="${n.tipo.cor}">
+                    <i class="bi" th:classappend="${n.tipo.name() == 'ANTECEDENCIA'} ? 'bi-hourglass-split' : 'bi-exclamation-octagon'"></i></span>
+                <a class="flex-grow-1 min-w-0 text-reset" th:href="@{/app/notificacoes/{id}/abrir(id=${n.id})}">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <strong th:text="${n.titulo}"></strong>
+                        <span class="status-badge" th:classappend="'status-' + ${n.tipo.cor}" th:text="${n.tipo.label}"></span>
+                        <span th:if="${!n.lida}" class="badge text-bg-primary">Nova</span>
+                    </div>
+                    <div class="text-muted small mt-1" th:text="${n.mensagem}"></div>
+                    <div class="text-muted mt-1" style="font-size:.74rem">
+                        <i class="bi bi-clock me-1"></i><span th:text="${#temporals.format(n.createdAt,'dd/MM/yyyy HH:mm')}"></span>
+                        <span th:if="${n.lida}"> · lida em <span th:text="${#temporals.format(n.lidaEm,'dd/MM/yyyy HH:mm')}"></span></span>
+                    </div>
+                </a>
+                <div class="d-flex gap-1 flex-none">
+                    <a th:if="${n.documento}" class="btn btn-sm btn-light" th:href="@{/app/notificacoes/{id}/abrir(id=${n.id})}">Abrir documento</a>
+                    <form th:if="${!n.lida}" th:action="@{/app/notificacoes/{id}/lida(id=${n.id})}" method="post" data-no-loading>
+                        <button class="btn btn-sm btn-ghost" type="submit" title="Marcar como lida" aria-label="Marcar como lida"><i class="bi bi-check2"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+        </div>
+    </th:block>
+
+    <!-- ===================== HISTÓRICO DE ENVIOS ===================== -->
+    <th:block th:if="${aba == 'envios'}">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="status-badge" th:each="i : ${integracoes}" th:classappend="'status-' + ${i.estado().cor}">
+                <i class="bi" th:classappend="${i.canal().icone}"></i>
+                <span th:text="${i.canal().label} + ': ' + ${i.estado().label}"></span></span>
+            <a sec:authorize="hasAuthority('SETTINGS_MANAGE')" class="small ms-1" th:href="@{/app/configuracoes(aba='canais')}">Configurar canais</a>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3" th:each="s : ${statusLista}">
+                <a class="card card-hover p-3 d-block text-reset" th:with="dgUrl=${@dg.comParametro('status', s.name())}" th:href="${dgUrl}">
+                    <div class="text-muted small" th:text="${s.label}"></div>
+                    <div class="fs-4 fw-bold tabular" th:text="${contagem[s.name()]}">0</div>
+                </a>
+            </div>
+        </div>
+        <div class="alert alert-info d-flex gap-2" th:if="${modoDevEmail}">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Registros com a situação <strong>"Não enviado (modo desenvolvimento)"</strong> foram gerados sem servidor SMTP configurado:
+                o conteúdo foi gravado em disco e <strong>nenhum e-mail saiu do servidor</strong>.</span>
+        </div>
+        <form class="card mb-3" th:action="@{/app/notificacoes/envios}" method="get" data-no-loading>
+            <div class="card-body row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small" for="qEnv">Pesquisar</label>
+                    <input class="form-control" id="qEnv" name="q" type="search" th:value="${q}" placeholder="Documento ou destinatário">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small" for="statusEnv">Situação do envio</label>
+                    <select class="form-select" id="statusEnv" name="status" data-autosubmit>
+                        <option value="">Todas</option>
+                        <option th:each="s : ${statusLista}" th:value="${s.name()}" th:text="${s.label}" th:selected="${status == s}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small" for="canalEnv">Canal</label>
+                    <select class="form-select" id="canalEnv" name="canal" data-autosubmit>
+                        <option value="">Todos</option>
+                        <option th:each="c : ${canais}" th:value="${c.name()}" th:text="${c.label}" th:selected="${canal == c}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small" for="tipoMsgEnv">Tipo de mensagem</label>
+                    <select class="form-select" id="tipoMsgEnv" name="tipoMensagem" data-autosubmit>
+                        <option value="">Todos</option>
+                        <option th:each="t : ${tiposMensagem}" th:value="${t.name()}" th:text="${t.label}" th:selected="${tipoMensagem == t}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2 d-none">
+                    <label class="form-label small" for="tipoEnv">Tipo de alerta</label>
+                    <select class="form-select" id="tipoEnv" name="tipo" data-autosubmit>
+                        <option value="">Todos</option>
+                        <option th:each="t : ${tipos}" th:value="${t.name()}" th:text="${t.label}" th:selected="${tipo == t}"></option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-grid"><button class="btn btn-dark" type="submit" title="Filtrar"><i class="bi bi-funnel"></i></button></div>
+            </div>
+        </form>
+        <div class="card table-card">
+            <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+            <th:block th:if="${pagina.totalElements == 0}"
+                      th:with="filtrado=${!#strings.isEmpty(#strings.trim(q)) or status != null or canal != null or tipoMensagem != null or tipo != null}">
+                <th:block th:if="${filtrado}">
+                    <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhum envio encontrado', 'Nenhum envio corresponde à pesquisa ou aos filtros. Altere a situação, o canal ou o tipo de mensagem.', @{/app/notificacoes/envios})}"></div>
+                </th:block>
+                <th:block th:unless="${filtrado}">
+                    <div th:replace="~{fragments/ui :: vazio('bi-envelope', 'Nenhum envio registrado', 'Os alertas enviados aparecerão aqui após a execução da rotina diária (ou ao clicar em Executar verificação agora).')}"></div>
+                </th:block>
+            </th:block>
+            <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+                <table class="table table-hover">
+                    <thead><tr><th>Data e horário</th><th>Canal</th><th>Referência</th><th>Tipo</th><th>Destinatário</th><th>Situação</th><th class="text-end"></th></tr></thead>
+                    <tbody>
+                    <tr th:each="h : ${pagina.content}">
+                        <td class="small tabular text-nowrap">
+                            <div th:text="${#temporals.format(h.enviadoEm != null ? h.enviadoEm : h.createdAt,'dd/MM/yyyy HH:mm')}"></div>
+                            <div class="text-muted" th:text="|${h.tentativas} tentativa(s)|"></div>
+                        </td>
+                        <td class="text-nowrap small"><i class="bi me-1" th:classappend="${h.canal.icone}"></i><span th:text="${h.canal.label}"></span></td>
+                        <td>
+                            <a th:if="${h.documento}" class="doc-name" th:href="@{/app/documentos/{id}(id=${h.documento.id})}" th:text="${h.documentoNome}"></a>
+                            <span th:unless="${h.documento}" class="fw-semibold" th:text="${h.documentoNome}"></span>
+                            <div class="text-muted small text-truncate" style="max-width: 320px" th:text="${h.assunto}"></div>
+                        </td>
+                        <td class="small"><div th:text="${h.tipoMensagem.label}"></div>
+                            <div class="text-muted" th:if="${h.tipoMensagem.name() == 'ALERTA_VENCIMENTO'}" th:text="${h.periodoLabel}"></div></td>
+                        <td class="small text-break" th:with="dest=${@dg.contato(h.canal, h.destinatario)}" th:text="${dest}"></td>
+                        <td>
+                            <span th:replace="~{fragments/ui :: statusEnvio(${h.status})}"></span>
+                            <div class="text-danger small mt-1 text-break" style="max-width: 280px" th:if="${h.ultimoErro}" th:text="${h.ultimoErro}"></div>
+                            <div class="text-muted small" th:if="${h.proximaTentativa}" th:text="'Nova tentativa: ' + ${#temporals.format(h.proximaTentativa,'dd/MM HH:mm')}"></div>
+                        </td>
+                        <td class="text-end">
+                            <form sec:authorize="hasAuthority('NOTIF_MANAGE')" th:if="${h.status.name() == 'FALHA' and h.tipoMensagem.retentavel}"
+                                  th:action="@{/app/notificacoes/envios/{id}/reenviar(id=${h.id})}" method="post">
+                                <button class="btn btn-sm btn-light" type="submit" data-loading-text="Reenviando..."><i class="bi bi-arrow-clockwise me-1"></i>Reenviar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+        </div>
+    </th:block>
+</div>
+</body>
+</html>

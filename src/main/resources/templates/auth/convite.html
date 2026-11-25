@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Aceitar convite · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <a class="d-flex d-lg-none align-items-center gap-2 fw-bold fs-5 mb-4 text-dark" th:href="@{/}">
+        <img th:src="@{/img/logo.svg}" alt="" width="32" height="32"> VIGENTRA</a>
+
+    <th:block th:unless="${convite}">
+        <h1>Convite indisponível</h1>
+        <div class="alert alert-warning d-flex gap-2 mt-3"><i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Este convite é inválido, expirou, foi cancelado ou já foi utilizado.</span></div>
+        <p class="text-muted small">Peça ao administrador da sua empresa para enviar um novo convite.
+            Se você já criou sua conta, basta entrar.</p>
+        <a class="btn btn-primary w-100" th:href="@{/login}">Ir para o login</a>
+    </th:block>
+
+    <th:block th:if="${convite}">
+        <h1>Junte-se a <span th:text="${convite.empresa.nome}">Empresa</span></h1>
+        <p class="sub"><span th:text="${convite.convidadoPor != null} ? ${convite.convidadoPor.nome} : 'O administrador'"></span>
+            convidou você com o perfil <strong th:text="${convite.perfil.nome}"></strong>. Crie sua senha para começar.</p>
+        <div th:if="${logado}" class="alert alert-info small">Você está conectado com outra conta. Ao aceitar, uma conta nova será criada para
+            <strong th:text="${convite.email}"></strong>.</div>
+
+        <form th:action="@{/convite}" th:object="${form}" method="post" class="needs-validation" novalidate>
+            <input type="hidden" th:field="*{token}">
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-circle-fill"></i>
+                <div><p class="mb-0" th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div></div>
+            <div class="mb-3">
+                <label class="form-label">E-mail</label>
+                <input class="form-control" th:value="${convite.email}" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="nome">Nome completo *</label>
+                <input class="form-control" id="nome" th:field="*{nome}" required minlength="3" maxlength="150" autocomplete="name"
+                       th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'">
+                <div class="invalid-feedback">Informe seu nome completo.</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="telefone">Telefone</label>
+                <input class="form-control" id="telefone" th:field="*{telefone}" data-mask="telefone" autocomplete="tel">
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="senha">Senha *</label>
+                    <div class="input-password">
+                        <input class="form-control" id="senha" type="password" th:field="*{senha}" required minlength="8" maxlength="72"
+                               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}" autocomplete="new-password" data-strength
+                               th:classappend="${#fields.hasErrors('senha')} ? 'is-invalid'">
+                        <button class="toggle-password" type="button" aria-label="Mostrar senha"><i class="bi bi-eye"></i></button>
+                        <div class="invalid-feedback">Mínimo de 8 caracteres com maiúscula, minúscula e número.</div>
+                    </div>
+                    <div class="password-meter"><span></span></div><div class="form-text password-label"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="confirmacaoSenha">Confirmar senha *</label>
+                    <div class="input-password">
+                        <input class="form-control" id="confirmacaoSenha" type="password" th:field="*{confirmacaoSenha}" required data-match="senha"
+                               autocomplete="new-password" th:classappend="${#fields.hasErrors('confirmacaoSenha')} ? 'is-invalid'">
+                        <button class="toggle-password" type="button" aria-label="Mostrar senha"><i class="bi bi-eye"></i></button>
+                        <div class="invalid-feedback">As senhas não conferem.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="aceiteTermos" th:field="*{aceiteTermos}" required
+                       th:classappend="${#fields.hasErrors('aceiteTermos')} ? 'is-invalid'">
+                <label class="form-check-label small" for="aceiteTermos">Li e aceito os <a th:href="@{/termos}" target="_blank" rel="noopener">Termos de Uso</a>
+                    e a <a th:href="@{/privacidade}" target="_blank" rel="noopener">Política de Privacidade</a>.</label>
+                <div class="invalid-feedback">É necessário aceitar os termos.</div>
+            </div>
+            <button class="btn btn-primary btn-lg w-100" type="submit" data-loading-text="Criando sua conta...">Aceitar convite</button>
+            <p class="text-muted small mt-3 mb-0">Convite válido até <span th:text="${#temporals.format(convite.expiraEm,'dd/MM/yyyy HH:mm')}"></span>.</p>
+        </form>
+    </th:block>
+</div>
+</body>
+</html>

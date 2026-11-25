@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Log de atividades · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item">Administração</li>
+                <li class="breadcrumb-item active" aria-current="page">Log de atividades</li></ol></nav>
+            <h1>Log de atividades</h1>
+            <p>Trilha de auditoria: cadastros, alterações, exclusões, acessos, envios e falhas — com data, horário, usuário e IP.</p>
+        </div>
+    </div>
+
+    <form class="card mb-3" th:action="@{/app/atividades}" method="get" data-no-loading>
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-12 col-lg-3">
+                <label class="form-label small" for="q">Pesquisar</label>
+                <input class="form-control" id="q" name="q" type="search" th:value="${q}" placeholder="Descrição, nome ou e-mail">
+            </div>
+            <div class="col-6 col-lg-3">
+                <label class="form-label small" for="acao">Ação</label>
+                <select class="form-select" id="acao" name="acao" data-autosubmit>
+                    <option value="">Todas as ações</option>
+                    <option th:each="a : ${acoes}" th:value="${a.name()}" th:text="${a.label}" th:selected="${acao == a}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="usuarioId">Usuário</label>
+                <select class="form-select" id="usuarioId" name="usuarioId" data-autosubmit>
+                    <option value="">Todos</option>
+                    <option th:each="u : ${usuarios}" th:value="${u.id}" th:text="${u.nome}" th:selected="${usuarioId == u.id}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-1">
+                <label class="form-label small" for="de">De</label>
+                <input class="form-control" id="de" name="de" type="date" th:value="${de}">
+            </div>
+            <div class="col-6 col-lg-1">
+                <label class="form-label small" for="ate">Até</label>
+                <input class="form-control" id="ate" name="ate" type="date" th:value="${ate}">
+            </div>
+            <div class="col-12 col-lg-2 d-flex gap-2">
+                <button class="btn btn-dark flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                <a class="btn btn-light" th:href="@{/app/atividades}" title="Limpar filtros"><i class="bi bi-x-lg"></i></a>
+            </div>
+        </div>
+    </form>
+
+    <div class="card table-card">
+        <!--/* condição em elemento externo: no Thymeleaf o th:replace é processado antes do th:if */-->
+        <th:block th:if="${pagina.totalElements == 0}"
+                  th:with="filtrado=${!#strings.isEmpty(#strings.trim(q)) or acao != null or usuarioId != null or de != null or ate != null}">
+            <th:block th:if="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazioFiltro('bi-search', 'Nenhuma atividade encontrada', 'Nenhum registro corresponde à pesquisa ou aos filtros. Altere o período, a ação ou o usuário.', @{/app/atividades})}"></div>
+            </th:block>
+            <th:block th:unless="${filtrado}">
+                <div th:replace="~{fragments/ui :: vazio('bi-clock-history', 'Nenhuma atividade registrada', 'As ações realizadas no sistema, como cadastros, alterações e acessos, aparecerão aqui.')}"></div>
+            </th:block>
+        </th:block>
+        <div class="table-responsive" th:if="${pagina.totalElements > 0}">
+            <table class="table">
+                <thead><tr><th>Data e horário</th><th>Ação</th><th>Descrição</th><th>Usuário</th><th class="d-none d-lg-table-cell">IP</th></tr></thead>
+                <tbody>
+                <tr th:each="l : ${pagina.content}">
+                    <td class="small tabular text-nowrap" th:text="${#temporals.format(l.createdAt,'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="text-nowrap"><span class="status-badge" th:classappend="'status-' + ${l.acao.cor}">
+                        <i class="bi" th:classappend="${l.acao.icone}"></i><span th:text="${l.acao.label}"></span></span></td>
+                    <td class="small" style="min-width: 280px" th:text="${l.descricao}"></td>
+                    <td class="small">
+                        <div class="fw-semibold" th:text="${l.usuarioNome}"></div>
+                        <div class="text-muted" th:text="${l.usuarioEmail}"></div>
+                    </td>
+                    <td class="small text-muted d-none d-lg-table-cell tabular" th:text="${l.ip ?: '—'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:replace="~{fragments/ui :: paginacao(${pagina})}"></div>
+    </div>
+</div>
+</body>
+</html>

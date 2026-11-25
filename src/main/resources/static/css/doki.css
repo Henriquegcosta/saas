@@ -1,0 +1,192 @@
+/* =====================================================================
+   Doki - assistente virtual do VIGENTRA
+   Usa os tokens de cor do app.css (--dg-*). Botão flutuante + janela de conversa.
+   Visual leve: cabeçalho claro, mensagens com respiro, sugestões em lista
+   alinhada à esquerda (todas com a mesma largura e acabamento) e campo de
+   pergunta integrado ao botão de envio.
+   ===================================================================== */
+.doki {
+  --doki-raio: 18px;
+  --doki-raio-item: 12px;
+  --doki-recuo: 36px;            /* largura do avatar das mensagens + espaço: alinha as sugestões ao balão */
+  --doki-azul-borda: #DBE7FE;
+  position: fixed; right: 20px; bottom: 20px; z-index: 1045; font-size: .9rem;
+}
+.sidebar-aberta .doki { display: none; }
+/* espaço extra no fim das páginas para o botão não cobrir conteúdo */
+body:has(.doki-fab) .dg-content { padding-bottom: 6rem; }
+
+/* ---------- botão flutuante ---------- */
+.doki-fab {
+  width: 58px; height: 58px; border-radius: 50%; border: 3px solid #fff; padding: 0;
+  display: grid; place-items: center; cursor: pointer;
+  background: linear-gradient(135deg, #3B82F6, var(--dg-primary-600));
+  box-shadow: 0 12px 28px -10px rgba(29, 78, 216, .55), 0 2px 6px rgba(15, 23, 42, .12);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.doki-fab img { width: 38px; height: 38px; }
+.doki-fab:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -10px rgba(29, 78, 216, .6), 0 2px 6px rgba(15, 23, 42, .12); }
+.doki-fab:focus-visible { outline: 3px solid var(--dg-primary-50); outline-offset: 2px; box-shadow: 0 0 0 6px rgba(37, 99, 235, .45); }
+.doki.aberto .doki-fab { transform: scale(.92); }
+
+/* ---------- janela de conversa ---------- */
+.doki-painel {
+  position: absolute; right: 0; bottom: 72px; width: 392px;
+  height: min(620px, calc(100vh - 116px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: #fff; border: 1px solid rgba(15, 23, 42, .08); border-radius: var(--doki-raio);
+  box-shadow: 0 28px 64px -24px rgba(15, 23, 42, .28), 0 6px 18px -6px rgba(15, 23, 42, .08);
+  animation: doki-entrar .2s ease-out;
+}
+.doki-painel[hidden] { display: none; }
+@keyframes doki-entrar { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* ---------- cabeçalho (claro) ---------- */
+.doki-head {
+  display: flex; align-items: center; gap: .75rem; padding: .9rem .85rem .9rem 1rem;
+  background: #fff; border-bottom: 1px solid var(--dg-gray-100);
+}
+.doki-avatar {
+  width: 42px; height: 42px; flex: none; border-radius: 12px; padding: 3px;
+  background: linear-gradient(135deg, #3B82F6, var(--dg-primary-600));
+  box-shadow: 0 4px 12px -4px rgba(37, 99, 235, .45);
+}
+.doki-identidade { min-width: 0; flex: 1; }
+.doki-nome {
+  font-size: 1rem; font-weight: 700; margin: 0; color: var(--dg-text); letter-spacing: -.01em;
+  display: flex; align-items: center; flex-wrap: wrap; column-gap: .5rem; row-gap: .1rem;
+}
+.doki-online {
+  font-size: .7rem; font-weight: 600; color: var(--dg-success); letter-spacing: 0;
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .1rem .45rem; border-radius: 999px; background: var(--dg-success-50);
+}
+.doki-online::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #22C55E; }
+.doki-slogan {
+  margin: .15rem 0 0; font-size: .75rem; line-height: 1.35; color: var(--dg-muted);
+}
+.doki-icone {
+  flex: none; width: 34px; height: 34px; border-radius: 10px; border: 0; color: var(--dg-muted);
+  background: transparent; display: grid; place-items: center; transition: background .15s, color .15s;
+}
+.doki-icone:hover, .doki-icone:focus-visible { background: var(--dg-gray-100); color: var(--dg-text); }
+.doki-icone:focus-visible { outline: 2px solid var(--dg-primary); outline-offset: 1px; }
+
+/* ---------- mensagens ---------- */
+.doki-mensagens {
+  flex: 1; overflow-y: auto; padding: 1.1rem 1rem 1rem;
+  background: linear-gradient(180deg, var(--dg-gray-50), #fff 85%);
+  display: flex; flex-direction: column; gap: .75rem;
+  scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent;
+}
+.doki-linha { display: flex; gap: .5rem; align-items: flex-end; }
+.doki-linha.usuario { justify-content: flex-end; }
+.doki-linha .doki-mini { width: 28px; height: 28px; flex: none; }
+.doki-bolha {
+  max-width: 85%; padding: .65rem .85rem; border-radius: 16px; line-height: 1.5;
+  background: #fff; border: 1px solid var(--dg-border); color: var(--dg-text);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+  overflow-wrap: anywhere;
+}
+.doki-linha.bot .doki-bolha { border-bottom-left-radius: 6px; max-width: calc(100% - var(--doki-recuo)); }
+.doki-linha.usuario .doki-bolha {
+  background: var(--dg-primary); border-color: var(--dg-primary); color: #fff; border-bottom-right-radius: 6px;
+  box-shadow: 0 4px 12px -6px rgba(37, 99, 235, .5);
+}
+.doki-bolha p { margin: 0; }
+.doki-bolha ol, .doki-bolha ul.doki-itens { margin: .5rem 0 0; padding-left: 1.15rem; }
+.doki-bolha li + li { margin-top: .25rem; }
+.doki-bolha.erro { border-color: #FECACA; background: var(--dg-danger-50); }
+
+/* documentos encontrados: lista dentro da própria mensagem, com a cor da situação na borda esquerda */
+.doki-docs { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.doki-bolha .doki-docs li + li { margin-top: 0; }
+.doki-doc {
+  display: flex; flex-direction: column; gap: .1rem; padding: .45rem .6rem;
+  border-left: 3px solid var(--dg-muted); border-radius: 8px; background: var(--dg-gray-50);
+}
+.doki-doc.st-danger { border-left-color: var(--dg-danger); }
+.doki-doc.st-warning { border-left-color: var(--dg-warning); }
+.doki-doc.st-success { border-left-color: var(--dg-success); }
+.doki-doc-nome { font-weight: 600; color: var(--dg-text); text-decoration: none; }
+a.doki-doc-nome:hover, a.doki-doc-nome:focus-visible { color: var(--dg-primary-600); text-decoration: underline; }
+.doki-doc-meta { font-size: .74rem; color: var(--dg-muted); }
+.doki-doc-status { font-size: .74rem; font-weight: 600; color: var(--dg-text-2); }
+.doki-doc.st-danger .doki-doc-status { color: var(--dg-danger); }
+.doki-doc.st-warning .doki-doc-status { color: #B45309; }
+.doki-doc.st-success .doki-doc-status { color: var(--dg-success); }
+
+/* atalhos (links) dentro da resposta */
+.doki-links { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .65rem; }
+.doki-links a { font-size: .78rem; font-weight: 600; padding: .3rem .7rem; border-radius: 8px; }
+
+/* ---------- sugestões: lista vertical, todas com a mesma largura e alinhamento ---------- */
+.doki-sugestoes {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: .4rem;
+  margin-left: var(--doki-recuo);
+}
+.doki-sugestoes button {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  width: 100%; min-height: 38px; margin: 0; padding: .5rem .7rem .5rem .8rem;
+  font: inherit; font-size: .8rem; font-weight: 500; line-height: 1.35; text-align: left;
+  color: var(--dg-primary-600); background: #fff; cursor: pointer;
+  border: 1px solid var(--doki-azul-borda); border-radius: var(--doki-raio-item);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+/* seta discreta à direita (Bootstrap Icons: chevron-right) - mesmo lugar em todas as sugestões */
+.doki-sugestoes button::after {
+  content: "\F285"; font-family: "bootstrap-icons"; font-size: .7rem; line-height: 1;
+  flex: none; color: #93B4F5; transition: transform .15s, color .15s;
+}
+.doki-sugestoes button:hover { background: var(--dg-primary-50); border-color: #BFD3FB; }
+.doki-sugestoes button:hover::after { color: var(--dg-primary); transform: translateX(2px); }
+.doki-sugestoes button:focus-visible { outline: none; border-color: var(--dg-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .2); }
+
+/* indicador "digitando..." */
+.doki-digitando { display: inline-flex; gap: 4px; padding: .8rem .9rem; }
+.doki-digitando span { width: 7px; height: 7px; border-radius: 50%; background: #94A3B8; animation: doki-ponto 1s infinite ease-in-out; }
+.doki-digitando span:nth-child(2) { animation-delay: .15s; }
+.doki-digitando span:nth-child(3) { animation-delay: .3s; }
+@keyframes doki-ponto { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+/* ---------- campo de pergunta: campo e botão de envio formam um único bloco ---------- */
+.doki-form {
+  display: flex; align-items: center; gap: .35rem; margin: .7rem .85rem .45rem; padding: .3rem .3rem .3rem .2rem;
+  background: #fff; border: 1px solid var(--dg-border); border-radius: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.doki-form:focus-within { border-color: var(--dg-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .15); }
+.doki-form .form-control {
+  border: 0; box-shadow: none; background: transparent; padding: .45rem .6rem; font-size: .88rem;
+}
+.doki-form .form-control:focus { box-shadow: none; }
+.doki-enviar {
+  width: 38px; height: 38px; flex: none; border-radius: 10px; padding: 0;
+  display: grid; place-items: center; font-size: .9rem;
+}
+.doki-rodape {
+  display: flex; align-items: center; justify-content: center;
+  font-size: .68rem; color: var(--dg-muted); text-align: center; padding: 0 1rem .65rem;
+}
+
+/* ---------- celulares ---------- */
+@media (max-width: 575.98px) {
+  /* Ancorado no topo/esquerda com medidas da TELA (vw/dvh): se alguma página ficar mais larga que a tela,
+     o navegador do celular alarga a área de layout e "right/bottom" jogariam o Doki para fora da parte visível. */
+  .doki { right: auto; bottom: auto; left: calc(100vw - 68px); top: calc(100vh - 68px); top: calc(100dvh - 68px); }
+  .doki-fab { width: 54px; height: 54px; }
+  .doki-fab img { width: 36px; height: 36px; }
+  .doki-painel {
+    position: fixed; left: 10px; right: auto; top: 10px; bottom: auto; width: calc(100vw - 20px);
+    height: calc(100vh - 88px); height: calc(100dvh - 88px); max-height: none; border-radius: 16px;
+  }
+  .doki-head { padding: .75rem .7rem .75rem .85rem; }
+  .doki-mensagens { padding: .9rem .8rem; }
+  .doki-sugestoes button { min-height: 42px; font-size: .82rem; }   /* área de toque maior */
+  .doki-form { margin: .6rem .7rem .4rem; }
+  .doki-form .form-control { font-size: 16px; }                     /* evita o zoom automático do iOS */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doki-painel, .doki-digitando span, .doki-fab, .doki-sugestoes button, .doki-sugestoes button::after { animation: none; transition: none; }
+}

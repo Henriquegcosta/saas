@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{::#scripts})}">
+<head><title>Relatórios · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Relatórios</li></ol></nav>
+            <h1>Relatórios</h1>
+            <p th:text="${r.descricaoFiltros}">Todos os documentos</p>
+        </div>
+        <div class="dropdown" sec:authorize="hasAuthority('REPORT_EXPORT')">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-download me-1"></i> Exportar relatório</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" th:with="dgQ=${@dg.queryAtual()}" th:href="@{/app/relatorios/exportar/pdf} + ${dgQ}">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>PDF (para impressão)</a></li>
+                <li><a class="dropdown-item" th:with="dgQ=${@dg.queryAtual()}" th:href="@{/app/relatorios/exportar/xlsx} + ${dgQ}">
+                    <i class="bi bi-file-earmark-excel text-success me-2"></i>Excel (.xlsx)</a></li>
+                <li><a class="dropdown-item" th:with="dgQ=${@dg.queryAtual()}" th:href="@{/app/relatorios/exportar/csv} + ${dgQ}">
+                    <i class="bi bi-filetype-csv text-primary me-2"></i>CSV</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <form class="card mb-4" th:action="@{/app/relatorios}" method="get" th:object="${filtro}" data-no-loading>
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="vencimentoDe">Vencimento de</label>
+                <input class="form-control" type="date" id="vencimentoDe" th:field="*{vencimentoDe}">
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="vencimentoAte">Vencimento até</label>
+                <input class="form-control" type="date" id="vencimentoAte" th:field="*{vencimentoAte}">
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="categoriaId">Categoria</label>
+                <select class="form-select" id="categoriaId" th:field="*{categoriaId}">
+                    <option value="">Todas</option>
+                    <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="responsavelId">Responsável</label>
+                <select class="form-select" id="responsavelId" th:field="*{responsavelId}">
+                    <option value="">Todos</option>
+                    <option th:each="x : ${responsaveis}" th:value="${x.id}" th:text="${x.nome}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label class="form-label small" for="status">Situação</label>
+                <select class="form-select" id="status" th:field="*{status}">
+                    <option value="">Todas</option>
+                    <option th:each="s : ${statusLista}" th:value="${s.name()}" th:text="${s.label}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2 d-flex gap-2">
+                <button class="btn btn-dark flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Gerar</button>
+                <a class="btn btn-light" th:href="@{/app/relatorios}" title="Limpar filtros"><i class="bi bi-x-lg"></i></a>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg"><div class="card kpi kpi-primary"><span class="kpi-label">Quantidade total</span>
+            <span class="kpi-value" th:text="${r.total()}"></span></div></div>
+        <div class="col-6 col-lg"><div class="card kpi kpi-success"><span class="kpi-label">Regulares</span>
+            <span class="kpi-value text-success" th:text="${r.regulares()}"></span></div></div>
+        <div class="col-6 col-lg"><div class="card kpi kpi-warning"><span class="kpi-label">Próximos do vencimento</span>
+            <span class="kpi-value" style="color:var(--dg-warning)" th:text="${r.proximos()}"></span></div></div>
+        <div class="col-6 col-lg"><div class="card kpi kpi-danger"><span class="kpi-label">Vencidos</span>
+            <span class="kpi-value text-danger" th:text="${r.vencidos()}"></span></div></div>
+        <div class="col-12 col-lg"><div class="card kpi kpi-secondary"><span class="kpi-label">Sem vencimento</span>
+            <span class="kpi-value" th:text="${r.semVencimento()}"></span></div></div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card h-100"><div class="card-header"><h2 class="card-title">Vencimentos por mês</h2></div>
+                <div class="card-body"><div class="chart-box"><canvas data-chart-type="meses" th:attr="data-chart=${graficoMeses}" role="img"
+                                                                     aria-label="Vencimentos por mês"></canvas></div></div></div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100"><div class="card-header"><h2 class="card-title">Documentos por categoria</h2></div>
+                <div class="card-body"><div class="chart-box"><canvas data-chart-type="categorias" th:attr="data-chart=${graficoCategorias},data-vazio=${filtro.ativo} ? 'Nenhum documento para os filtros selecionados.' : 'Nenhum documento cadastrado ainda.'" role="img"
+                                                                     aria-label="Documentos por categoria"></canvas></div></div></div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <div class="card table-card h-100">
+                <div class="card-header"><h2 class="card-title">Vencimentos por categoria</h2></div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Categoria</th><th class="text-end">Total</th><th class="text-end">Regulares</th>
+                            <th class="text-end">Próximos</th><th class="text-end">Vencidos</th></tr></thead>
+                        <tbody>
+                        <tr th:each="l : ${r.porCategoria()}">
+                            <td><span class="cat-chip"><span class="cat-dot" th:style="|background:${l.cor()}|"></span><span th:text="${l.nome()}"></span></span></td>
+                            <td class="text-end tabular fw-semibold" th:text="${l.total()}"></td>
+                            <td class="text-end tabular text-success" th:text="${l.regulares()}"></td>
+                            <td class="text-end tabular" style="color:var(--dg-warning)" th:text="${l.proximos()}"></td>
+                            <td class="text-end tabular text-danger" th:text="${l.vencidos()}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(r.porCategoria())}"><td colspan="5" class="p-0"><div th:replace="~{fragments/ui :: vazioCompacto(${filtro.ativo} ? 'bi-search' : 'bi-file-earmark-bar-graph', ${filtro.ativo} ? 'Nenhum documento para os filtros' : 'Nenhum documento cadastrado', ${filtro.ativo} ? 'Altere o período, a categoria, o responsável ou a situação.' : 'Os totais aparecerão aqui depois que houver documentos cadastrados.')}"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card table-card h-100">
+                <div class="card-header"><h2 class="card-title">Relatório por responsável</h2></div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Responsável</th><th class="text-end">Total</th><th class="text-end">Próximos</th>
+                            <th class="text-end">Vencidos</th><th style="width:120px">Em dia</th></tr></thead>
+                        <tbody>
+                        <tr th:each="l : ${r.porResponsavel()}">
+                            <td><div class="fw-semibold" th:text="${l.nome()}"></div><div class="text-muted small" th:text="${l.detalhe()}"></div></td>
+                            <td class="text-end tabular fw-semibold" th:text="${l.total()}"></td>
+                            <td class="text-end tabular" style="color:var(--dg-warning)" th:text="${l.proximos()}"></td>
+                            <td class="text-end tabular text-danger" th:text="${l.vencidos()}"></td>
+                            <td th:with="pct=${l.total() == 0 ? 0 : (l.total() - l.vencidos()) * 100 / l.total()}">
+                                <div class="progress progress-thin" role="progressbar" th:aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" th:classappend="${pct >= 90} ? 'bg-success' : (${pct >= 70} ? 'bg-warning' : 'bg-danger')" th:style="|width:${pct}%|"></div>
+                                </div>
+                                <div class="text-muted small tabular" th:text="${pct} + '%'"></div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(r.porResponsavel())}"><td colspan="5" class="p-0"><div th:replace="~{fragments/ui :: vazioCompacto(${filtro.ativo} ? 'bi-search' : 'bi-file-earmark-bar-graph', ${filtro.ativo} ? 'Nenhum documento para os filtros' : 'Nenhum documento cadastrado', ${filtro.ativo} ? 'Altere o período, a categoria, o responsável ou a situação.' : 'Os totais aparecerão aqui depois que houver documentos cadastrados.')}"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="scripts">
+    <script th:src="@{/webjars/chart.js/4.4.1/dist/chart.umd.js}"></script>
+    <script th:src="@{/js/charts.js}"></script>
+</div>
+</body>
+</html>

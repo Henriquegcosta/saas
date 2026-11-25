@@ -1,0 +1,44 @@
+# Perfil de testes: banco H2 em memória (modo MySQL), sem SMTP (modo desenvolvimento) e sem agendador.
+spring:
+  datasource:
+    url: jdbc:h2:mem:vigentra-test;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  thymeleaf:
+    cache: false
+  mail:
+    host: ""
+
+logging:
+  file:
+    name: target/test-logs/vigentra-test.log
+  level:
+    root: WARN
+    br.com.vigentra: INFO
+
+app:
+  remember-me-key: chave-de-teste
+  secret-key: segredo-de-teste-hmac
+  comunicacao:
+    async: false
+  storage:
+    dir: target/test-uploads
+  # Testes NUNCA usam provedores reais, mesmo que o .env local tenha credenciais.
+  platform-admins: ""
+  mail:
+    provider: dev
+    dev-output-dir: target/test-emails
+    brevo:
+      api-key: ""
+  whatsapp:
+    access-token: ""
+    phone-number-id: ""
+    app-secret: ""
+    webhook-verify-token: ""
+    dev-mode: false
+    dev-output-dir: target/test-whatsapp
+  alerts:
+    enabled: false

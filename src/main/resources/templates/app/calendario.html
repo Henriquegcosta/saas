@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: app(~{::title}, ~{::#conteudo}, ~{::#scripts})}">
+<head><title>Calendário · VIGENTRA</title></head>
+<body>
+<div id="conteudo">
+    <div class="page-header">
+        <div>
+            <nav aria-label="breadcrumb"><ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/app/dashboard}">Início</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Calendário</li></ol></nav>
+            <h1>Calendário de vencimentos</h1>
+            <p>Selecione uma data para ver os documentos que vencem nela.</p>
+        </div>
+        <div class="legend">
+            <span><i class="bg-danger"></i>Vencido</span>
+            <span><i class="bg-warning"></i>Próximo do vencimento</span>
+            <span><i class="bg-success"></i>Regular (vencimento futuro)</span>
+        </div>
+    </div>
+
+    <div class="row g-4" id="calendario" th:data-hoje="${hoje}" th:data-api="@{/app/api/calendario}"
+         th:data-docs="@{/app/documentos/}" th:data-login="@{/login}">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header d-flex flex-wrap align-items-center gap-2">
+                    <div class="btn-group" role="group" aria-label="Navegação entre meses">
+                        <button class="btn btn-light btn-sm" id="calAnterior" type="button" aria-label="Mês anterior" title="Mês anterior (Alt+←)">
+                            <i class="bi bi-chevron-left"></i></button>
+                        <button class="btn btn-light btn-sm" id="calHoje" type="button">Hoje</button>
+                        <button class="btn btn-light btn-sm" id="calProximo" type="button" aria-label="Próximo mês" title="Próximo mês (Alt+→)">
+                            <i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    <h2 class="h5 mb-0 ms-2" id="calTitulo" aria-live="polite">Carregando...</h2>
+                    <div class="ms-auto d-flex flex-wrap gap-1" id="calResumo"></div>
+                </div>
+                <div class="cal-grid" id="calGrid">
+                    <div class="p-5 text-center text-muted" style="grid-column:1/-1">
+                        <span class="spinner-border spinner-border-sm me-2"></span>Carregando vencimentos...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card" id="calPainel" aria-live="polite">
+                <div class="card-body"><div class="skeleton mb-2" style="height:18px;width:60%"></div><div class="skeleton" style="height:14px;width:40%"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="scripts"><script th:src="@{/js/calendario.js}"></script></div>
+</body>
+</html>

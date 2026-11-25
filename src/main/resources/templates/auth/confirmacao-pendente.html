@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/auth :: auth(~{::title}, ~{::#conteudo}, ~{})}">
+<head><title>Confirme seu e-mail · VIGENTRA</title></head>
+<body>
+<div id="conteudo" class="auth-card fade-up">
+    <div class="empty-state p-0 text-start"><div class="icon mx-0"><i class="bi bi-envelope-paper"></i></div></div>
+    <h1>Confirme seu e-mail</h1>
+    <p class="sub">Enviamos um link de confirmação para <strong th:text="${email}">email</strong>.
+        Por segurança, o acesso ao sistema é liberado somente após a confirmação.</p>
+
+    <div th:if="${sucesso}" class="alert alert-success d-flex gap-2"><i class="bi bi-check-circle-fill"></i><span th:text="${sucesso}"></span></div>
+    <div th:if="${erro}" class="alert alert-danger d-flex gap-2"><i class="bi bi-exclamation-circle-fill"></i><span th:text="${erro}"></span></div>
+    <div th:if="${modoDevEmail}" class="alert alert-info small d-flex gap-2"><i class="bi bi-code-slash"></i>
+        <span><strong>Modo desenvolvimento:</strong> nenhum e-mail é enviado. A mensagem com o link foi gravada em
+            <code class="env" th:text="${diretorioDev}"></code> — abra o arquivo .html mais recente.</span></div>
+
+    <ul class="text-muted small ps-3 mb-4">
+        <li>Verifique também a caixa de spam ou promoções.</li>
+        <li>O link vale por 48 horas e pode ser usado uma vez.</li>
+        <li>Ao pedir um novo link, o anterior deixa de funcionar.</li>
+    </ul>
+    <form th:action="@{/conta/confirmar-email/reenviar}" method="post" class="mb-2">
+        <button class="btn btn-primary w-100" type="submit" data-loading-text="Enviando..."><i class="bi bi-arrow-repeat me-1"></i>Reenviar e-mail de confirmação</button>
+    </form>
+    <form th:action="@{/logout}" method="post">
+        <button class="btn btn-light w-100" type="submit">Sair</button>
+    </form>
+</div>
+</body>
+</html>

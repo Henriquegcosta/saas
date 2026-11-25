@@ -1,0 +1,36 @@
+# =====================================================================
+# VIGENTRA - serviço systemd
+# Instalação:
+#   sudo cp deploy/systemd/vigentra.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now vigentra
+# Logs:  journalctl -u vigentra -f   |   /var/log/vigentra/vigentra.log
+# =====================================================================
+[Unit]
+Description=VIGENTRA - Gestor de Validade de Documentos
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vigentra
+Group=vigentra
+WorkingDirectory=/opt/vigentra
+# Variáveis de ambiente (credenciais) - arquivo com permissão 600
+EnvironmentFile=/etc/vigentra/vigentra.env
+Environment=TZ=America/Sao_Paulo
+Environment="JAVA_OPTS=-Xms256m -Xmx512m"
+ExecStart=/bin/sh -c 'exec /usr/bin/java $JAVA_OPTS -jar /opt/vigentra/vigentra.jar'
+SuccessExitStatus=143
+# Reinicialização automática em caso de falha
+Restart=on-failure
+RestartSec=10
+# Endurecimento (hardening)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/vigentra /var/log/vigentra
+
+[Install]
+WantedBy=multi-user.target
